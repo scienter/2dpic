@@ -1,0 +1,341 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "mesh.h"
+#include "constants.h"
+#include "plasma.h"
+#include <math.h>
+#include "mpi.h"
+
+void updateCurrent2DSec(Domain *D)
+{
+    int i,j,s,n,i1,i2,j1,j2,k1,k2,intXc,intYc,numdataUp,numdataBt,start,center;
+    int i11,i22,j11,j22;
+    int nxSub,nySub;
+    float inverDt,x1,x2,y1,y2,xr,yr;
+    float Fx1,Fx2,Wx1,Wx2,Wx3,Wx4,Wx5,Wx6,Wx7,Wx8;
+    float Fy1,Fy2,Wy1,Wy2,Wy3,Wy4,Wy5,Wy6,Wy7,Wy8;
+    float dx,dy,dt;
+    float xx11,xx12,xx13,xx14,xx21,xx22,xx23,xx24;
+    float yy11,yy12,yy13,yy14,yy21,yy22,yy23,yy24;
+    float vz,gamma,xc,yc,wx,wy,xcc,ycc,xold,xnew,yold,ynew;
+    ptclList *p;
+    FieldElement **field; 
+    LoadList *LL;   
+    field=D->field;
+    double findR(),maximum(),minimum();
+
+    double coeff[D->nSpecies];
+    int charge[D->nSpecies];
+
+    nxSub=D->nxSub;
+    nySub=D->nySub;
+   
+    dt=D->dt;
+    dx=D->dx; 
+    dy=D->dy;
+    inverDt=1.0/D->dt;
+    s=0;
+    LL=D->loadList;
+    while(LL->next)
+    {
+       coeff[s]=LL->charge*LL->density/LL->criticalDensity/LL->numberInCell;
+//       coeff[s]=LL->charge*LL->superP/LL->criticalDensity/D->lambda/D->lambda/dx/dy;
+//       charge[s]=LL->charge;
+       LL=LL->next;
+       s++;
+    }
+
+    int myrank,nTasks;
+    MPI_Status status;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+    //initialize J
+    for(i=0; i<nxSub+5; i++)
+      for(j=0; j<nySub+5; j++)
+      {
+        field[i][j].J1Old=field[i][j].J1;
+        field[i][j].J2Old=field[i][j].J2;
+        field[i][j].J3Old=field[i][j].J3;
+        field[i][j].J1=0.0;
+        field[i][j].J2=0.0;
+        field[i][j].J3=0.0;
+      }
+
+    for(i=2; i<=nxSub+1; i++)
+      for(j=2; j<=nySub+1; j++)
+      {
+        for(s=0; s<D->nSpecies; s++)
+        {
+          p=field[i][j].head[s]->pt;     
+         
+          while(p) 
+          {
+            gamma=sqrt(1.0+p->p1*p->p1+p->p2*p->p2+p->p3*p->p3);
+            vz=p->p3/gamma;
+            xold=p->oldX-2;
+            xnew=p->x+i-2;
+            yold=p->oldY-2;
+            ynew=p->y+j-2;
+
+            xc=0.5*(xold+xnew)+2;
+            yc=0.5*(yold+ynew)+2;
+            intXc=(int)xc;
+            intYc=(int)yc;
+            xcc=xc-intXc;
+            ycc=yc-intYc;
+
+            i1=(int)(xold+1);
+            i2=(int)(xnew+1);
+            j1=(int)(yold+1);
+            j2=(int)(ynew+1);
+
+            if(i1==i2) 
+              xr=0.5*(xold+xnew);
+            else             
+              xr=maximum(i1,i2);
+            if(j1==j2) 
+              yr=0.5*(yold+ynew);
+            else             
+              yr=maximum(j1,j2);
+
+            xr=findR(i1,i2,xold,xnew);
+            yr=findR(j1,j2,yold,ynew);
+            
+            xx12=(xold+xr)*0.5-(i1-1);
+            xx11=1+xx12;
+            xx14=2-xx12;
+            xx13=1-xx12;
+            xx22=(xnew+xr)*0.5-(i2-1);
+            xx21=1+xx22;
+            xx24=2-xx22;
+            xx23=1-xx22;
+            yy12=(yold+yr)*0.5-(j1-1);
+            yy11=1+yy12;
+            yy14=2-yy12;
+            yy13=1-yy12;
+            yy22=(ynew+yr)*0.5-(j2-1);
+            yy21=1+yy22;
+            yy24=2-yy22;
+            yy23=1-yy22;
+
+            Fx1=(xr-xold);
+            Fx2=(xnew-xr);
+            Fy1=(yr-yold)*dy*inverDt;
+            Fy2=(ynew-yr)*dy*inverDt;
+                     
+            Wx1=(2-xx11)*(2-xx11)*(2-xx11)/6.0;
+            Wx2=(4.0-6*xx12*xx12+3*xx12*xx12*xx12)/6.0;
+            Wx3=(4.0-6*xx13*xx13+3*xx13*xx13*xx13)/6.0;
+            Wx4=(2-xx14)*(2-xx14)*(2-xx14)/6.0;
+            Wx5=(2-xx21)*(2-xx21)*(2-xx21)/6.0;
+            Wx6=(4.0-6*xx22*xx22+3*xx22*xx22*xx22)/6.0;
+            Wx7=(4.0-6*xx23*xx23+3*xx23*xx23*xx23)/6.0;
+            Wx8=(2-xx24)*(2-xx24)*(2-xx24)/6.0;
+            Wy1=(2-yy11)*(2-yy11)*(2-yy11)/6.0;
+            Wy2=(4.0-6*yy12*yy12+3*yy12*yy12*yy12)/6.0;
+            Wy3=(4.0-6*yy13*yy13+3*yy13*yy13*yy13)/6.0;
+            Wy4=(2-yy14)*(2-yy14)*(2-yy14)/6.0;
+            Wy5=(2-yy21)*(2-yy21)*(2-yy21)/6.0;
+            Wy6=(4.0-6*yy22*yy22+3*yy22*yy22*yy22)/6.0;
+            Wy7=(4.0-6*yy23*yy23+3*yy23*yy23*yy23)/6.0;
+            Wy8=(2-yy24)*(2-yy24)*(2-yy24)/6.0;
+
+//            i1+=1; i2+=1;
+//            j1+=1; j2+=1;
+                         
+            field[i1+1][j1-1].J1+=Fx1*Wy1*coeff[s];
+            field[i1+1][j1].J1+=Fx1*Wy2*coeff[s];
+            field[i1+1][j1+1].J1+=Fx1*Wy3*coeff[s];
+            field[i1+1][j1+2].J1+=Fx1*Wy4*coeff[s];
+            field[i2+1][j2-1].J1+=Fx2*Wy5*coeff[s];
+            field[i2+1][j2].J1+=Fx2*Wy6*coeff[s];
+            field[i2+1][j2+1].J1+=Fx2*Wy7*coeff[s];
+            field[i2+1][j2+2].J1+=Fx2*Wy8*coeff[s];
+
+            field[i1-1][j1+1].J2+=Fy1*Wx1*coeff[s];
+            field[i1][j1+1].J2+=Fy1*Wx2*coeff[s];
+            field[i1+1][j1+1].J2+=Fy1*Wx3*coeff[s];
+            field[i1+2][j1+1].J2+=Fy1*Wx4*coeff[s];
+            field[i2-1][j2+1].J2+=Fy2*Wx5*coeff[s];
+            field[i2][j2+1].J2+=Fy2*Wx6*coeff[s];
+            field[i2+1][j2+1].J2+=Fy2*Wx7*coeff[s];
+            field[i2+2][j2+1].J2+=Fy2*Wx8*coeff[s];
+
+             wx=1-xcc; wy=1-ycc;            
+             field[intXc][intYc].J3+=wx*wy*vz*coeff[s];
+             wx=xcc; wy=ycc;            
+             field[intXc+1][intYc+1].J3+=wx*wy*vz*coeff[s];
+             wx=1-xcc; wy=ycc;            
+             field[intXc][intYc+1].J3+=wx*wy*vz*coeff[s];
+             wx=xcc; wy=1-ycc;            
+             field[intXc+1][intYc].J3+=wx*wy*vz*coeff[s];
+
+             p=p->next;
+           }	//End of while(p)
+        }	//End of for(s)     
+     }		//End of for(i,j)
+
+
+}
+
+
+/*
+void updateCurrent2D(Domain *D)
+{
+    int i,j,s,n,i1,i2,j1,j2,intXc,intYc,numdataUp,numdataBt,start,center;
+    int nxSub,nySub;
+    double inverDt,x1,x2,y1,y2,xr,yr;
+    double Fx1,Fx2,Wx1,Wx2,Fy1,Fy2,Wy1,Wy2,dx,dy,dt;
+    double vz,gamma,xc,yc,wx,wy,xcc,ycc;
+    ptclList *p;
+    FieldElement **field; 
+    LoadList *LL;   
+    field=D->field;
+    int maximum();
+    int minimum();
+
+    double coeff[D->nSpecies];
+    int charge[D->nSpecies];
+
+    nxSub=D->nxSub;
+    nySub=D->nySub;
+   
+    dt=D->dt;
+    dx=D->dx; 
+    dy=D->dy;
+    inverDt=1.0/D->dt;
+    s=0;
+    LL=D->loadList;
+    while(LL->next)
+    {
+       coeff[s]=LL->charge*LL->density/LL->criticalDensity/LL->numberInCell;
+//       coeff[s]=LL->charge*LL->superP/LL->criticalDensity/D->lambda/D->lambda/dx/dy;
+//       charge[s]=LL->charge;
+       LL=LL->next;
+       s++;
+    }
+
+    int myrank,nTasks;
+    MPI_Status status;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+    //initialize J
+    for(i=0; i<nxSub+3; i++)
+      for(j=0; j<nySub+3; j++)
+      {
+        field[i][j].J1Old=field[i][j].J1;
+        field[i][j].J2Old=field[i][j].J2;
+        field[i][j].J3Old=field[i][j].J3;
+        field[i][j].J1=0.0;
+        field[i][j].J2=0.0;
+        field[i][j].J3=0.0;
+      }
+
+    for(i=1; i<=nxSub; i++)
+      for(j=1; j<=nySub; j++)
+      {
+        for(s=0; s<D->nSpecies; s++)
+        {
+          p=field[i][j].head[s]->pt;     
+         
+          while(p) 
+          {
+             gamma=sqrt(1.0+p->p1*p->p1+p->p2*p->p2+p->p3*p->p3);
+             vz=p->p3/gamma;
+             x2=p->x+i;  y2=p->y+j;
+             x1=p->oldX;  y1=p->oldY;
+             xc=0.5*(x1+x2);  yc=0.5*(y1+y2);
+             intXc=(int)xc;   intYc=(int)yc;
+             xcc=xc-intXc;    ycc=yc-intYc;
+             i1=(int)x1;
+             i2=(int)x2;
+             j1=(int)y1;
+             j2=(int)y2;
+             if(i1==i2) 
+               xr=0.5*(x1+x2);
+             else 
+               xr=maximum(i1,i2);
+             if(j1==j2) 
+               yr=0.5*(y1+y2);
+             else 
+               yr=maximum(j1,j2);
+
+             Fx1=(xr-x1);
+             Fx2=(x2-xr);
+             Fy1=(yr-y1)*dy*inverDt;
+             Fy2=(y2-yr)*dy*inverDt;
+             Wx1=0.5*(x1+xr)-i1;
+             Wx2=0.5*(xr+x2)-i2;
+             Wy1=0.5*(y1+yr)-j1;
+             Wy2=0.5*(yr+y2)-j2;
+
+             field[i1][j1].J1+=Fx1*(1.0-Wy1)*coeff[s];
+             field[i1][j1+1].J1+=Fx1*Wy1*coeff[s];
+             field[i1][j1].J2+=Fy1*(1.0-Wx1)*coeff[s];
+             field[i1+1][j1].J2+=Fy1*Wx1*coeff[s];
+
+             field[i2][j2].J1+=Fx2*(1.0-Wy2)*coeff[s];
+             field[i2][j2+1].J1+=Fx2*Wy2*coeff[s];
+             field[i2][j2].J2+=Fy2*(1.0-Wx2)*coeff[s];
+             field[i2+1][j2].J2+=Fy2*Wx2*coeff[s];
+
+             wx=1-xcc; wy=1-ycc;            
+             field[intXc][intYc].J3+=wx*wy*vz*coeff[s];
+             wx=xcc; wy=ycc;            
+             field[intXc+1][intYc+1].J3+=wx*wy*vz*coeff[s];
+             wx=1-xcc; wy=ycc;            
+             field[intXc][intYc+1].J3+=wx*wy*vz*coeff[s];
+             wx=xcc; wy=1-ycc;            
+             field[intXc+1][intYc].J3+=wx*wy*vz*coeff[s];
+
+
+             p=p->next;
+           }	//End of while(p)
+        }	//End of for(s)     
+     }		//End of for(i,j)
+
+
+}
+*/
+
+double findR(double x1, double x2,double x3, double x4)
+{
+  double minimum();
+  double maximum();
+  double result,result1,result2,result3;
+
+  result1=minimum(x1,x2);
+  result2=maximum(x1-1,x2-1);
+  result3=maximum(result2,(x3+x4)*0.5);
+  result=minimum(result1,result3);
+
+  return result;
+}
+
+double maximum(double x1,double x2)
+{
+   double result;
+
+   if(x1>=x2)
+      result=x1;
+   else
+      result=x2;
+  
+   return result;
+}
+
+double minimum(double x1,double x2)
+{
+   double result;
+
+   if(x1>=x2)
+      result=x2;
+   else
+      result=x1;
+  
+   return result;
+}

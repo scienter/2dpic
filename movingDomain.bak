@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "mesh.h"
+
+void movingDomain2D(Domain *D)
+{
+    int i,j,s;
+    FieldElement **field;
+    field=D->field;
+    ptclList *p,*tmp,*New;      
+    ptclHead **head;
+   
+    //delete first column   
+    for(j=0; j<=D->nySub+1; j++)
+    {
+      for(s=0; s<D->nSpecies; s++)
+      {
+        p=field[1][j].head[s]->pt;
+        while(p)
+        {
+          tmp=p->next;
+          field[1][j].head[s]->pt=tmp;
+          p->next=NULL;
+          free(p);
+          p=field[1][j].head[s]->pt;
+        }
+      }
+      
+    }
+ 
+
+    for(i=1; i<=D->nxSub; i++)
+      for(j=1; j<=D->nySub; j++)
+      {
+         field[i][j].E1=field[i+1][j].E1;
+         field[i][j].B1=field[i+1][j].B1;
+         field[i][j].Pr=field[i+1][j].Pr;
+         field[i][j].Pl=field[i+1][j].Pl;
+         field[i][j].Sr=field[i+1][j].Sr;
+         field[i][j].Sl=field[i+1][j].Sl;
+         field[i][j].E1C=field[i+1][j].E1C;
+         field[i][j].B1C=field[i+1][j].B1C;
+         field[i][j].PrC=field[i+1][j].PrC;
+         field[i][j].PlC=field[i+1][j].PlC;
+         field[i][j].SrC=field[i+1][j].SrC;
+         field[i][j].SlC=field[i+1][j].SlC;
+
+         head=field[i+1][j].head;
+         field[i][j].head=head;
+
+//       field[i].J1=field[i+1].J1;
+//       field[i].J2=field[i+1].J2;
+//       field[i].J3=field[i+1].J3;
+        
+      }		//End of for(i,j)
+
+    i=D->nxSub+1;
+    for(j=1; j<=D->nySub; j++)
+    {
+      for(s=0; s<D->nSpecies; s++)
+      {
+        p=field[i][j].head[s]->pt;
+        while(p)
+        {
+          tmp=p->next;
+          field[i][j].head[s]->pt=tmp;
+          p->next=NULL;
+          free(p);
+          p=field[i][j].head[s]->pt;
+        }
+      }
+    }
+
+    D->minXSub+=1;
+    D->maxXSub+=1;
+}  
+     
+/*       
+         for(s=0; s<D->nSpecies; s++)
+         {
+           p=field[i][j].head[s]->pt;
+           while(p)
+           {
+             tmp=p->next;
+             field[i][j].head[s]->pt=tmp;
+             p->next=NULL;
+             free(p);
+             p=field[i][j].head[s]->pt;
+           }
+
+           p=field[i+1][j].head[s]->pt;
+           while(p)
+           {
+             New = (ptclList *)malloc(sizeof(ptclList));
+             New->next = field[i][j].head[s]->pt;
+             field[i][j].head[s]->pt=New;
+
+             New->x=p->x;
+             New->oldX=p->oldX-1;
+             New->y=p->y;
+             New->oldY=p->oldY;
+             New->p1=p->p1;
+             New->p2=p->p2;
+             New->p3=p->p3;
+             New->q=p->q;
+             New->m=p->m;
+             New->index=p->index;
+          
+             p=p->next;
+           }             
+         } 	//End of for(s)  
+*/

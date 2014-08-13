@@ -1,0 +1,79 @@
+[Domain]
+
+ maxStep=1000
+ saveStep=50
+ saveStart=50
+
+ L=1
+ moving=0
+
+ minX=0
+ maxX=1e-4
+ minY=0
+ maxY=1e-4
+ dy_over_dx = 5
+
+ boostGamma=1
+ filter=0
+ filterStep=10
+ boostSaveStart=50000
+ boostSaveEnd=50000
+ boostSaveStep=50000
+
+ divisionDirection=1
+[Laser]
+
+ wavelength=1e-6
+ a0=1
+ rU=5			//number of wave lenth
+ rD=5
+ polarity=2
+ loadPositionX=0.0e-4		//laser start position [m]
+ loadPositionY=0.5e-4		//laser start position [m]
+ divisionLambda=20	// dx is [wavelength/divisionLambda]
+ beamWaist=0.2e-4
+ focus=0.5e-4
+
+[External]
+ E1=0
+ E2=0
+ E3=0
+ B1=0
+ B2=0
+ B3=0
+
+[Plasma]
+ species=Electron
+ density=1e25
+ numberInCell=10
+ startIndex=0		//The starting particle index
+ velocityX=0.0
+// pointPosition=4.5e-5
+
+ Lnodes=4
+ X0=0.2e-4
+ X1=0.21e-4
+ X2=1-3
+ X3=11e-3
+ Ln0=0
+ Ln1=1
+ Ln2=1
+ Ln3=1
+
+[Plasma]
+ species=HPlus1
+ density=1e25
+ numberInCell=10
+ startIndex=0		//The starting particle index
+ velocityX=0.0
+// pointPosition=4.5e-5
+
+ Lnodes=4
+ X0=0.2e-4
+ X1=0.21e-4
+ X2=1-3
+ X3=11e-3
+ Ln0=0
+ Ln1=1
+ Ln2=1
+ Ln3=1
