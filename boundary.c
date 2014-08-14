@@ -109,6 +109,10 @@ printf("ny=%d, nySub=%d, minYSub=%d, maxYSub=%d\n",D->ny,D->nySub,D->minYSub,D->
          for(j=0; j<10; j++)
          {
            D->UpPML[i][j].Bzx=0.0;
+           D->UpPML[i][j].Bzy=0.0;
+           D->DnPML[i][j].Bzx=0.0;
+           D->DnPML[i][j].Bzy=0.0;
+         }
      }	//End of DSX
    
      D->particle = (Particle **)malloc((D->nxSub+3)*sizeof(Particle *));
