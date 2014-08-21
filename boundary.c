@@ -108,10 +108,18 @@ printf("ny=%d, nySub=%d, minYSub=%d, maxYSub=%d\n",D->ny,D->nySub,D->minYSub,D->
        for(i=0; i<D->nxSub+5; i++)
          for(j=0; j<10; j++)
          {
-           D->UpPML[i][j].Bzx=0.0;
-           D->UpPML[i][j].Bzy=0.0;
-           D->DnPML[i][j].Bzx=0.0;
-           D->DnPML[i][j].Bzy=0.0;
+           D->UpPML[i][j].Dx=0.0;
+           D->UpPML[i][j].Dy=0.0;
+           D->UpPML[i][j].Dz=0.0;
+           D->UpPML[i][j].Hx=0.0;
+           D->UpPML[i][j].Hy=0.0;
+           D->UpPML[i][j].Hz=0.0;
+           D->UpPML[i][j].Ex=0.0;
+           D->UpPML[i][j].Ey=0.0;
+           D->UpPML[i][j].Ez=0.0;
+           D->UpPML[i][j].Bx=0.0;
+           D->UpPML[i][j].By=0.0;
+           D->UpPML[i][j].Bz=0.0;
          }
      }	//End of DSX
    

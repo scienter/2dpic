@@ -125,12 +125,12 @@ void loadLaser2D(Domain *D,LaserList *L,double t)
       longitudinal=L->amplitude*exp(-(t-t0)*(t-t0)/rD/rD);
    else if(t>=2*rU+2*rD+flat) 
       longitudinal=0.0;
-/*
+
    if(L->loadPointY>=D->minYSub && L->loadPointY<D->maxYSub)
       rank=myrank;
    else
       rank=nTasks+1;
-*/
+
 
    positionX=L->loadPointX+istart-D->minXSub;
    positionY=L->loadPointY+jstart-D->minYSub;
@@ -145,9 +145,10 @@ void loadLaser2D(Domain *D,LaserList *L,double t)
 
      if(L->polarity==2 && laserOK==1)
      {
-//         D->field[positionX][positionY].Pr=longitudinal*sin(omega*t)+Ext->Pr;            
-//         D->field[positionX][positionY].Pl=longitudinal*sin(omega*t)+Ext->Pl;
+         field[positionX][positionY].Pr=longitudinal*sin(omega*t);  
 
+         field[positionX][positionY].Pl=longitudinal*sin(omega*t);
+/*
        for(j=jstart; j<jend; j++)
        {
          y=(j-jstart+D->minYSub-jC)*D->dy;
@@ -156,10 +157,14 @@ void loadLaser2D(Domain *D,LaserList *L,double t)
          field[positionX][j].Pr=amp;            
          field[positionX][j].Pl=amp;
        }
-
+*/
      }           
      else if(L->polarity==3 && laserOK==1)
      {
+         field[positionX][positionY].Sr=longitudinal*sin(omega*t);  
+
+         field[positionX][positionY].Sl=longitudinal*sin(omega*t);
+/*
        for(j=jstart; j<jend; j++)
        {
          y=(j-jstart+D->minYSub-jC)*D->dy;
@@ -168,6 +173,7 @@ void loadLaser2D(Domain *D,LaserList *L,double t)
          field[positionX][j].Sr=amp;            
          field[positionX][j].Sl=amp;
        }
+*/
      }
    }     //End of fieldType=1
 

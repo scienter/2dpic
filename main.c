@@ -33,6 +33,8 @@ int main(int argc, char *argv[])
     void solveField1D();
     void solveField2DC_DSX();
     void solveField2D_DSX();
+    void absorpbing();
+    void absorpbingC();
     void periodY();
     void periodYC();
     void periodY1core();
@@ -184,11 +186,13 @@ int main(int argc, char *argv[])
 //       else           periodY(&D);
        if(D.fieldType==1)
        {
+         absorpbing(&D);
          solveField2DC_DSX(&D);
          MPI_TransferF_DSX_YminusC(&D);
          MPI_TransferF_DSX_YplusC(&D);
 //       if(nTasks==1)  periodY1coreC(&D);   
 
+         absorpbingC(&D);
          solveField2D_DSX(&D);
          MPI_TransferF_DSX_Yminus(&D);
          MPI_TransferF_DSX_Yplus(&D);

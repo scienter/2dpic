@@ -114,8 +114,18 @@ typedef struct _FieldDSX
 
 typedef struct _UpPML 
 {
-   float Bzx;
-   float Bzy;
+   float Dx;
+   float Dy;
+   float Dz;
+   float Ex;
+   float Ey;
+   float Ez;
+   float Hx;
+   float Hy;
+   float Hz;
+   float Bx;
+   float By;
+   float Bz;
 }  UpPML;
 
 typedef struct _DnPML 
