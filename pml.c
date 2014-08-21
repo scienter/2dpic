@@ -46,8 +46,8 @@ void absorpbing(Domain *D)
     float dx,dy,dt,preB1C;
     float nowPr,nowSr,prevPr,prevSr;
     float nowPrC,nowSrC,prevPrC,prevSrC;
-    float pmlValue,pmlCell,s,def;
-    int myrank, nTasks;
+    float pmlValue,s;
+    int myrank, nTasks,pmlCell,def;
     double sigma();
 
     MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
@@ -71,24 +71,45 @@ void absorpbing(Domain *D)
     jstart=D->jstart;
     jend=D->jend;
 
-    pmlCell=20;
-    pmlValue=0.5;
+    pmlCell=D->pmlCell;
+    pmlValue=1.0/(float)pmlCell/(float)pmlCell;
+//    pmlValue=1.0/(float)pmlCell/(float)pmlCell/(float)pmlCell;
+
     //up
-    if(myrank==nTasks)
+    if(myrank==nTasks-1)
     {
       def=jend-pmlCell;
-      for(i=istart; i<iend; i++)
-        for(j=jend-1-pmlCell; j<jend; j++)
+      for(i=istart-1; i<=iend; i++)
+        for(j=def; j<=jend; j++)
         {
           s=pmlValue*(j-def-0.5)*(j-def-0.5);
+//          s=pmlValue*(j-def-0.5)*(j-def-0.5)*(j-def-0.5);
           field[i][j].E1 -= s*field[i][j].E1;
 
           s=pmlValue*(j-def)*(j-def);
+//          s=pmlValue*(j-def)*(j-def)*(j-def);
           field[i][j].Pr -= s*field[i][j].Pr;
           field[i][j].Pl -= s*field[i][j].Pl;
         }
     }
 
+    //down
+    if(myrank==0)
+    {
+      def=jstart-1+pmlCell;
+      for(i=istart-1; i<=iend; i++)
+        for(j=jstart-1; j<=def; j++)
+        {
+          s=pmlValue*(def-j-0.5)*(def-j-0.5);
+//          s=pmlValue*(j-def-0.5)*(j-def-0.5)*(j-def-0.5);
+          field[i][j].E1 -= s*field[i][j].E1;
+
+          s=pmlValue*(def-j)*(def-j);
+//          s=pmlValue*(j-def)*(j-def)*(j-def);
+          field[i][j].Pr -= s*field[i][j].Pr;
+          field[i][j].Pl -= s*field[i][j].Pl;
+        }
+    }
 }
 
 void absorpbingC(Domain *D)
@@ -97,8 +118,8 @@ void absorpbingC(Domain *D)
     float dx,dy,dt,preB1C;
     float nowPr,nowSr,prevPr,prevSr;
     float nowPrC,nowSrC,prevPrC,prevSrC;
-    float pmlValue,pmlCell,s,def;
-    int myrank, nTasks;
+    float pmlValue,s;
+    int myrank, nTasks,pmlCell,def;
     double sigma();
 
     MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
@@ -122,19 +143,40 @@ void absorpbingC(Domain *D)
     jstart=D->jstart;
     jend=D->jend;
 
-    pmlCell=20;
-    pmlValue=0.5;
+    pmlCell=D->pmlCell;
+    pmlValue=1.0/(float)pmlCell/(float)pmlCell;
+    def=jend-pmlCell;
+//    pmlValue=1.0/(float)pmlCell/(float)pmlCell/(float)pmlCell;
     //up
-    if(myrank==nTasks)
+    if(myrank==nTasks-1)
     {
-      def=jend-pmlCell;
-      for(i=istart; i<iend; i++)
-        for(j=jend-1-pmlCell; j<jend; j++)
+      for(i=istart-1; i<=iend; i++)
+        for(j=def; j<=jend; j++)
         {
           s=pmlValue*(j-def-0.5)*(j-def-0.5);
+//          s=pmlValue*(j-def-0.5)*(j-def-0.5)*(j-def-0.5);
           field[i][j].E1C -= s*field[i][j].E1C;
 
           s=pmlValue*(j-def)*(j-def);
+//          s=pmlValue*(j-def)*(j-def)*(j-def);
+          field[i][j].PrC -= s*field[i][j].PrC;
+          field[i][j].PlC -= s*field[i][j].PlC;
+        }
+    }
+
+    //down
+    if(myrank==0)
+    {
+      def=jstart-1+pmlCell;
+      for(i=istart-1; i<=iend; i++)
+        for(j=jstart-1; j<=def; j++)
+        {
+          s=pmlValue*(def-j-0.5)*(def-j-0.5);
+//          s=pmlValue*(j-def-0.5)*(j-def-0.5)*(j-def-0.5);
+          field[i][j].E1C -= s*field[i][j].E1C;
+
+          s=pmlValue*(def-j)*(def-j);
+//          s=pmlValue*(j-def)*(j-def)*(j-def);
           field[i][j].PrC -= s*field[i][j].PrC;
           field[i][j].PlC -= s*field[i][j].PlC;
         }

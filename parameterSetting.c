@@ -152,6 +152,14 @@ void parameterSetting(Domain *D,External *Ext, char *input)
       fail=1;
    }
 
+   //pml
+   if(FindParameters("Domain",1,"pmlCell",input,str)) D->pmlCell=atoi(str);
+   else  {
+      printf("in [Domain], pmlCell=? [ea]\n");
+      fail=1;
+   }
+   
+
    //External field parameter setting
    if(FindParameters("External",1,"E1",input,str)) E1=atof(str);
    else  {

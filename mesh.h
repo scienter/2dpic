@@ -74,7 +74,9 @@ typedef struct _Domain
    int *probeX;
    int *probeY;
    struct _Probe **probe;
-   
+
+   //PML
+   int pmlCell;   
 }  Domain; 
 
 typedef struct _Boost
