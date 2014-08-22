@@ -154,13 +154,14 @@ void absorpbingC(Domain *D)
         for(j=def; j<=jend; j++)
         {
           s=pmlValue*(j-def-0.5)*(j-def-0.5);
-//          s=pmlValue*(j-def-0.5)*(j-def-0.5)*(j-def-0.5);
+//          field[i][j].E1C = (1.0-s)*field[i][j].E1C;
           field[i][j].E1C -= s*field[i][j].E1C;
 
           s=pmlValue*(j-def)*(j-def);
-//          s=pmlValue*(j-def)*(j-def)*(j-def);
           field[i][j].PrC -= s*field[i][j].PrC;
           field[i][j].PlC -= s*field[i][j].PlC;
+//          field[i][j].PrC = (1.0-s)*field[i][j].PrC;
+//          field[i][j].PlC = (1.0-s)*field[i][j].PlC;
         }
     }
 
@@ -172,13 +173,14 @@ void absorpbingC(Domain *D)
         for(j=jstart-1; j<=def; j++)
         {
           s=pmlValue*(def-j-0.5)*(def-j-0.5);
-//          s=pmlValue*(j-def-0.5)*(j-def-0.5)*(j-def-0.5);
           field[i][j].E1C -= s*field[i][j].E1C;
+//          field[i][j].E1C = (1.0-s)*field[i][j].E1C;
 
           s=pmlValue*(def-j)*(def-j);
-//          s=pmlValue*(j-def)*(j-def)*(j-def);
           field[i][j].PrC -= s*field[i][j].PrC;
           field[i][j].PlC -= s*field[i][j].PlC;
+//          field[i][j].PrC = (1.0-s)*field[i][j].PrC;
+//          field[i][j].PlC = (1.0-s)*field[i][j].PlC;
         }
     }
 

@@ -28,6 +28,9 @@ typedef struct _LoadList  {
    int lnodes;     //longitudinal point number
    float *ln;      //longitudinal density (1 is P->density)
    float *lpoint;    //longitudinal point
+   int tnodes;     //transverse point number
+   float *tn;      //transverse density (1 is P->density)
+   float *tpoint;    //transverse point
    float cx;       //circular plasma's center X
    float cy;       //circular plasma's center Y
 

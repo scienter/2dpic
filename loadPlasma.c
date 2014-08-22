@@ -8,7 +8,7 @@
 void loadMovingPlasma2DBoost(Domain *D)
 {
    int i,j,istart,iend,jstart,jend,s,l,intNum,cnt,np,nc,leftIndex,rightIndex;
-   int position,iter;
+   int posX,posY,iter,t;
    float tmp,dx,dy,cx,cy;
    float wp,pDt,v1,v2,v3,gamma,beta[2];
 
@@ -45,114 +45,121 @@ void loadMovingPlasma2DBoost(Domain *D)
        cx=LL->cx;
        cy=LL->cy;
        for(l=0; l<LL->lnodes-1; l++)
-       {
-         if(LL->type==Circle) {
-           tmp=sqrt((cx-(i-istart+D->minXSub)*dx)*(cx-(i-istart+D->minXSub)*dx)+
-                    (cy-(j-jstart+D->minYSub)*dy)*(cy-(j-jstart+D->minYSub)*dy));
-           position=(int)((cx-tmp)/dx+istart);
-         }
-         else if(LL->type==Point4)
-           position=i+D->minXSub;
- 
-         if(position>=LL->lpoint[l] && position<LL->lpoint[l+1])
+         for(t=0; t<LL->tnodes-1; t++)
          {
-           ne=((LL->ln[l+1]-LL->ln[l])/(LL->lpoint[l+1]-LL->lpoint[l])
-              *(position-LL->lpoint[l])+LL->ln[l]);
-           ne*=LL->numberInCell*D->beta;	//it is the float number of superparticles.
-           intNum=(int)ne;
-           randTest=ne-intNum;
-           cnt=0;
-           while(cnt<intNum)
-           {               
-             positionX=randomValue(beta[iter]);
-             positionY=randomValue(1.0);
-
-             if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
-             {
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s]->pt;
-                particle[i][j].head[s]->pt = New;
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-             } 
-             else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
-             {
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s]->pt;
-                particle[i][j].head[s]->pt = New;
-
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s+1]->pt;
-                particle[i][j].head[s+1]->pt = New;
-
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-             } 
-             
-             cnt++;
-           }		//end of while(cnt)
-
-           if(randTest>randomValue(1.0))
+           
+           if(LL->type==Circle) {
+             tmp=sqrt((cx-(i-istart+D->minXSub)*dx)*(cx-(i-istart+D->minXSub)*dx)+
+                    (cy-(j-jstart+D->minYSub)*dy)*(cy-(j-jstart+D->minYSub)*dy));
+             posX=(int)((cx-tmp)/dx+istart)-istart;
+             posY=j+D->minYSub-jstart;
+           }
+           else if(LL->type==Point4) {
+             posX=i+D->minXSub-istart;
+             posY=j+D->minYSub-jstart;
+           }
+ 
+           if((posX>=LL->lpoint[l] && posX<LL->lpoint[l+1]) && 
+              (posY>=LL->tpoint[t] && posY<LL->tpoint[t+1]))
            {
-             positionX=randomValue(beta[iter]);
-             positionY=randomValue(1.0);
+             ne=((LL->ln[l+1]-LL->ln[l])/(LL->lpoint[l+1]-LL->lpoint[l])
+                *(posX-LL->lpoint[l])+LL->ln[l]);
+             ne*=((LL->tn[t+1]-LL->tn[t])/(LL->tpoint[t+1]-LL->tpoint[t])
+                *(posY-LL->tpoint[t])+LL->tn[t]);
+             ne*=LL->numberInCell*D->beta;	//it is the float number of superparticles.
+             intNum=(int)ne;
+             randTest=ne-intNum;
+             cnt=0;
+             while(cnt<intNum)
+             {               
+               positionX=randomValue(beta[iter]);
+               positionY=randomValue(1.0);
+  
+               if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
+               {
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s]->pt;
+                 particle[i][j].head[s]->pt = New;
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+               } 
+               else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
+               {
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s]->pt;
+                 particle[i][j].head[s]->pt = New;
 
-             if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s+1]->pt;
+                 particle[i][j].head[s+1]->pt = New;
+
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+               } 
+             
+               cnt++;
+             }		//end of while(cnt)
+
+             if(randTest>randomValue(1.0))
              {
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s]->pt;
-                particle[i][j].head[s]->pt = New;
+               positionX=randomValue(beta[iter]);
+               positionY=randomValue(1.0);
 
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-             } 
-             else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
-             {
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s]->pt;
-                particle[i][j].head[s]->pt = New;
-
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s+1]->pt;
-                particle[i][j].head[s+1]->pt = New;
-
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-             } 
-           }		//end of if(randTest)
-
-         }
-       } 			//end of for(lnodes)  
+               if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
+               {
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s]->pt;
+                 particle[i][j].head[s]->pt = New;
+ 
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+               } 
+               else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
+               {
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s]->pt;
+                 particle[i][j].head[s]->pt = New;
+ 
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+ 
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s+1]->pt;
+                 particle[i][j].head[s+1]->pt = New;
+ 
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+               } 
+             }		//end of if(randTest)
+           }		//end of if(l,t nodes)
+         }		//end of for(lnodes,tnodes)  
 
        LL=LL->next;
        s++;
@@ -192,7 +199,7 @@ void loadMovingPlasma2DBoost(Domain *D)
 void loadMovingPlasma2D(Domain *D)
 {
    int i,j,istart,iend,jstart,jend,s,l,intNum,cnt,np,nc,leftIndex,rightIndex;
-   int position,iter;
+   int posX,posY,iter,t;
    float tmp,dx,dy,cx,cy;
    float wp,pDt,v1,v2,v3,gamma;
 
@@ -224,114 +231,121 @@ void loadMovingPlasma2D(Domain *D)
        cx=LL->cx;
        cy=LL->cy;
        for(l=0; l<LL->lnodes-1; l++)
-       {
-         if(LL->type==Circle) {
-           tmp=sqrt((cx-(i-istart+D->minXSub)*dx)*(cx-(i-istart+D->minXSub)*dx)+
-                    (cy-(j-jstart+D->minYSub)*dy)*(cy-(j-jstart+D->minYSub)*dy));
-           position=(int)((cx-tmp)/dx+istart);
-         }
-         else if(LL->type==Point4)
-           position=i+D->minXSub;
- 
-         if(position>=LL->lpoint[l] && position<LL->lpoint[l+1])
+         for(t=0; t<LL->tnodes-1; t++)
          {
-           ne=((LL->ln[l+1]-LL->ln[l])/(LL->lpoint[l+1]-LL->lpoint[l])
-              *(position-LL->lpoint[l])+LL->ln[l]);
-           ne*=LL->numberInCell;	//it is the float number of superparticles.
-           intNum=(int)ne;
-           randTest=ne-intNum;
-           cnt=0;
-           while(cnt<intNum)
-           {               
-             positionX=randomValue(1.0);
-             positionY=randomValue(1.0);
-
-             if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
-             {
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s]->pt;
-                particle[i][j].head[s]->pt = New;
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-             } 
-             else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
-             {
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s]->pt;
-                particle[i][j].head[s]->pt = New;
-
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s+1]->pt;
-                particle[i][j].head[s+1]->pt = New;
-
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-             } 
-             
-             cnt++;
-           }		//end of while(cnt)
-
-           if(randTest>randomValue(1.0))
+           if(LL->type==Circle) {
+             tmp=sqrt((cx-(i-istart+D->minXSub)*dx)*(cx-(i-istart+D->minXSub)*dx)+
+                    (cy-(j-jstart+D->minYSub)*dy)*(cy-(j-jstart+D->minYSub)*dy));
+             posX=(int)((cx-tmp)/dx+istart)-istart;
+             posY=j+D->minYSub-jstart;
+           }
+           else if(LL->type==Point4)  {
+             posX=i+D->minXSub-istart;
+             posY=j+D->minYSub-jstart;
+           }
+ 
+           if(posX>=LL->lpoint[l] && posX<LL->lpoint[l+1] &&
+              posY>=LL->tpoint[t] && posY<LL->tpoint[t+1])
            {
-             positionX=randomValue(1.0);
-             positionY=randomValue(1.0);
+             ne=((LL->ln[l+1]-LL->ln[l])/(LL->lpoint[l+1]-LL->lpoint[l])
+                *(posX-LL->lpoint[l])+LL->ln[l]);
+             ne*=((LL->tn[t+1]-LL->tn[t])/(LL->tpoint[t+1]-LL->tpoint[t])
+                *(posY-LL->tpoint[t])+LL->tn[t]);
+             ne*=LL->numberInCell;	//it is the float number of superparticles.
+             intNum=(int)ne;
+             randTest=ne-intNum;
+             cnt=0;
+             while(cnt<intNum)
+             {               
+               positionX=randomValue(1.0);
+               positionY=randomValue(1.0);
 
-             if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
+               if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
+               {
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s]->pt;
+                 particle[i][j].head[s]->pt = New;
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+               } 
+               else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
+               {
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s]->pt;
+                 particle[i][j].head[s]->pt = New;
+
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+ 
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s+1]->pt;
+                 particle[i][j].head[s+1]->pt = New;
+ 
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+               } 
+             
+               cnt++;
+             }		//end of while(cnt)
+
+             if(randTest>randomValue(1.0))
              {
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s]->pt;
-                particle[i][j].head[s]->pt = New;
+               positionX=randomValue(1.0);
+               positionY=randomValue(1.0);
 
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-             } 
-             else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
-             {
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s]->pt;
-                particle[i][j].head[s]->pt = New;
+               if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
+               {
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s]->pt;
+                 particle[i][j].head[s]->pt = New;
+ 
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+               } 
+               else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
+               {
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s]->pt;
+                 particle[i][j].head[s]->pt = New;
+ 
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+ 
+                 New = (ptclList *)malloc(sizeof(ptclList)); 
+                 New->next = particle[i][j].head[s+1]->pt;
+                 particle[i][j].head[s+1]->pt = New;
+ 
+                 New->x = positionX;
+                 New->oldX=i+positionX;
+                 New->y = positionY;
+                 New->oldY=j+positionY;
+                 LL->index++;
+                 New->index=LL->index;            
+               } 
+             }		//end of if(randTest)
 
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i][j].head[s+1]->pt;
-                particle[i][j].head[s+1]->pt = New;
-
-                New->x = positionX;
-                New->oldX=i+positionX;
-                New->y = positionY;
-                New->oldY=j+positionY;
-                LL->index++;
-                New->index=LL->index;            
-             } 
-           }		//end of if(randTest)
-
-         }
-       } 			//end of for(lnodes)  
+           }
+         } 			//end of for(lnodes)  
 
        LL=LL->next;
        s++;
@@ -370,7 +384,7 @@ void loadPlasma2D(Domain *D)
 {
    int i,j,istart,iend,jstart,jend;
    int s,l,intNum,cnt,np,nc,leftIndex,rightIndex;
-   int position;
+   int posX,posY,t;
    float cx,cy,tmp,dx,dy;
    float wp,pDt,v1,v2,v3,gamma;
    float ne,randTest,positionX,positionY;
@@ -403,113 +417,119 @@ void loadPlasma2D(Domain *D)
          cx=LL->cx;
          cy=LL->cy;
          for(l=0; l<LL->lnodes-1; l++)
-         {
-           if(LL->type==Circle) {
-             tmp=sqrt((cx-(i-istart+D->minXSub)*dx)*(cx-(i-istart+D->minXSub)*dx)+
-                      (cy-(j-jstart+D->minYSub)*dy)*(cy-(j-jstart+D->minYSub)*dy));
-             position=(int)((cx-tmp)/dx+istart);
-           }
-           else if(LL->type==Point4)
-             position=i+D->minXSub;
- 
-           if(position>=LL->lpoint[l] && position<LL->lpoint[l+1])
+           for(t=0; t<LL->tnodes-1; t++)
            {
-             ne=((LL->ln[l+1]-LL->ln[l])/(LL->lpoint[l+1]-LL->lpoint[l])*(position-LL->lpoint[l])+LL->ln[l]);
-             ne*=LL->numberInCell;	//it is the float number of superparticles.
-             intNum=(int)ne;
-             randTest=ne-intNum;
-             
-             cnt=0;
-             while(cnt<intNum)
-             {               
-               positionX=randomValue(1.0);
-               positionY=randomValue(1.0);
-
-               if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
-               {
-                  New = (ptclList *)malloc(sizeof(ptclList)); 
-                  New->next = particle[i][j].head[s]->pt;
-                  particle[i][j].head[s]->pt = New;
-
-                  New->x = positionX;
-                  New->oldX=i+positionX;
-                  New->y = positionY;
-                  New->oldY=j+positionY;
-                  LL->index++;
-                  New->index=LL->index;            
-               } 
-               else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
-               {
-                  New = (ptclList *)malloc(sizeof(ptclList)); 
-                  New->next = particle[i][j].head[s]->pt;
-                  particle[i][j].head[s]->pt = New;
+             if(LL->type==Circle) {
+               tmp=sqrt((cx-(i-istart+D->minXSub)*dx)*(cx-(i-istart+D->minXSub)*dx)+
+                      (cy-(j-jstart+D->minYSub)*dy)*(cy-(j-jstart+D->minYSub)*dy));
+               posX=(int)((cx-tmp)/dx+istart)-istart;
+               posY=j+D->minYSub-jstart;
+             }
+             else if(LL->type==Point4) {
+               posX=i+D->minXSub-istart;
+               posY=j+D->minYSub-jstart;
+             }
  
-                  New->x = positionX;
-                  New->oldX=i+positionX;
-                  New->y = positionY;
-                  New->oldY=j+positionY;
-                  LL->index++;
-                  New->index=LL->index;            
-
-                  New = (ptclList *)malloc(sizeof(ptclList)); 
-                  New->next = particle[i][j].head[s+1]->pt;
-                  particle[i][j].head[s+1]->pt = New;
-
-                  New->x = positionX;
-                  New->oldX=i+positionX;
-                  New->y = positionY;
-                  New->oldY=j+positionY;
-                  LL->index++;
-                  New->index=LL->index;            
-               } 
-               
-               cnt++;
-             }		//end of while(cnt)
-
-             if(randTest>randomValue(1.0))
+             if(posX>=LL->lpoint[l] && posX<LL->lpoint[l+1] &&
+                posY>=LL->tpoint[t] && posY<LL->tpoint[t+1])
              {
-               positionX=randomValue(1.0);
-               positionY=randomValue(1.0);
+               ne=((LL->ln[l+1]-LL->ln[l])/(LL->lpoint[l+1]-LL->lpoint[l])*(posX-LL->lpoint[l])+LL->ln[l]);
+               ne*=((LL->tn[t+1]-LL->tn[t])/(LL->tpoint[t+1]-LL->tpoint[t])*(posY-LL->tpoint[t])+LL->tn[t]);
+               ne*=LL->numberInCell;	//it is the float number of superparticles.
+               intNum=(int)ne;
+               randTest=ne-intNum;
+             
+               cnt=0;
+               while(cnt<intNum)
+               {               
+                 positionX=randomValue(1.0);
+                 positionY=randomValue(1.0);
 
-               if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
-               {
-                  New = (ptclList *)malloc(sizeof(ptclList)); 
-                  New->next = particle[i][j].head[s]->pt;
-                  particle[i][j].head[s]->pt = New;
-
-                  New->x = positionX;
-                  New->oldX=i+positionX;
-                  New->y = positionY;
-                  New->oldY=j+positionY;
-                  LL->index++;
-                  New->index=LL->index;            
-               } 
-               else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
-               {
-                  New = (ptclList *)malloc(sizeof(ptclList)); 
-                  New->next = particle[i][j].head[s]->pt;
-                  particle[i][j].head[s]->pt = New;
+                 if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
+                 {
+                   New = (ptclList *)malloc(sizeof(ptclList)); 
+                   New->next = particle[i][j].head[s]->pt;
+                   particle[i][j].head[s]->pt = New;
  
-                  New->x = positionX;
-                  New->oldX=i+positionX;
-                  New->y = positionY;
-                  New->oldY=j+positionY;
-                  LL->index++;
-                  New->index=LL->index;            
+                   New->x = positionX;
+                   New->oldX=i+positionX;
+                   New->y = positionY;
+                   New->oldY=j+positionY;
+                   LL->index++;
+                   New->index=LL->index;            
+                 } 
+                 else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
+                 {
+                   New = (ptclList *)malloc(sizeof(ptclList)); 
+                   New->next = particle[i][j].head[s]->pt;
+                   particle[i][j].head[s]->pt = New;
+  
+                   New->x = positionX;
+                   New->oldX=i+positionX;
+                   New->y = positionY;
+                   New->oldY=j+positionY;
+                   LL->index++;
+                   New->index=LL->index;            
+ 
+                   New = (ptclList *)malloc(sizeof(ptclList)); 
+                   New->next = particle[i][j].head[s+1]->pt;
+                   particle[i][j].head[s+1]->pt = New;
+ 
+                   New->x = positionX;
+                   New->oldX=i+positionX;
+                   New->y = positionY;
+                   New->oldY=j+positionY;
+                   LL->index++;
+                   New->index=LL->index;            
+                 } 
+               
+                 cnt++;
+               }		//end of while(cnt)
 
-                  New = (ptclList *)malloc(sizeof(ptclList)); 
-                  New->next = particle[i][j].head[s+1]->pt;
-                  particle[i][j].head[s+1]->pt = New;
+               if(randTest>randomValue(1.0))
+               {
+                 positionX=randomValue(1.0);
+                 positionY=randomValue(1.0);
 
-                  New->x = positionX;
-                  New->oldX=i+positionX;
-                  New->y = positionY;
-                  New->oldY=j+positionY;
-                  LL->index++;
-                  New->index=LL->index;            
-               } 
-             }		//end of if(randTest)
-           }
+                 if(LL->withNextSpcs==0 && LL->withPrevSpcs==0)
+                 {
+                   New = (ptclList *)malloc(sizeof(ptclList)); 
+                   New->next = particle[i][j].head[s]->pt;
+                   particle[i][j].head[s]->pt = New;
+ 
+                   New->x = positionX;
+                   New->oldX=i+positionX;
+                   New->y = positionY;
+                   New->oldY=j+positionY;
+                   LL->index++;
+                   New->index=LL->index;            
+                 } 
+                 else if(LL->withNextSpcs==1 && LL->withPrevSpcs==0)
+                 {
+                   New = (ptclList *)malloc(sizeof(ptclList)); 
+                   New->next = particle[i][j].head[s]->pt;
+                   particle[i][j].head[s]->pt = New;
+  
+                   New->x = positionX;
+                   New->oldX=i+positionX;
+                   New->y = positionY;
+                   New->oldY=j+positionY;
+                   LL->index++;
+                   New->index=LL->index;            
+ 
+                   New = (ptclList *)malloc(sizeof(ptclList)); 
+                   New->next = particle[i][j].head[s+1]->pt;
+                   particle[i][j].head[s+1]->pt = New;
+ 
+                   New->x = positionX;
+                   New->oldX=i+positionX;
+                   New->y = positionY;
+                   New->oldY=j+positionY;
+                   LL->index++;
+                   New->index=LL->index;            
+                 } 
+               }		//end of if(randTest)
+             }
          } 			//end of for(lnodes)  
 
          LL=LL->next;

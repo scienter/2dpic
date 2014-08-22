@@ -502,6 +502,12 @@ int findLoadParameters(int rank, LoadList *LL,Domain *D,char *input)
          printf("Each nodes indicates the point of plasma density changing.\n");
          fail=1;
       }
+      if(FindParameters("Plasma",rank,"Tnodes",input,str)) LL->tnodes=atoi(str);
+      else  {
+         printf("in [Plasma], Tnodes=?\n");
+         printf("Each nodes indicates the point of plasma density changing.\n");
+         fail=1;
+      }
    
       LL->lpoint = (float *)malloc(LL->lnodes*sizeof(float));
       LL->ln = (float *)malloc(LL->lnodes*sizeof(float));   
@@ -509,7 +515,7 @@ int findLoadParameters(int rank, LoadList *LL,Domain *D,char *input)
       {
          sprintf(name,"X%d",i);
          if(FindParameters("Plasma",rank,name,input,str)) 
-            LL->lpoint[i] = 1 + atof(str)/D->gamma/D->lambda/D->dx;
+            LL->lpoint[i] = atof(str)/D->gamma/D->lambda/D->dx;
          else 
          { printf("X%d should be defined.\n",i);  fail=1; }
 
@@ -518,6 +524,23 @@ int findLoadParameters(int rank, LoadList *LL,Domain *D,char *input)
             LL->ln[i] = atof(str);
          else 
          { printf("Ln%d should be defined.\n",i);  fail=1; } 
+      }
+      LL->tpoint = (float *)malloc(LL->tnodes*sizeof(float));
+      LL->tn = (float *)malloc(LL->tnodes*sizeof(float));   
+      for(i=0; i<LL->tnodes; i++)
+      {
+         sprintf(name,"Y%d",i);
+         if(FindParameters("Plasma",rank,name,input,str)) {
+            LL->tpoint[i] = atof(str)/D->lambda/D->dy;
+         }
+         else 
+         { printf("Y%d should be defined.\n",i);  fail=1; }
+
+         sprintf(name,"Tn%d",i);
+         if(FindParameters("Plasma",rank,name,input,str)) 
+            LL->tn[i] = atof(str);
+         else 
+         { printf("Tn%d should be defined.\n",i);  fail=1; } 
       }
 
       if(FindParameters("Plasma",rank,"cx",input,str))  {
