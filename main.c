@@ -128,13 +128,14 @@ int main(int argc, char *argv[])
        
        if(D.boostOn==1)
        {
-          if(iteration>=D.minT && iteration<=D.maxT)
-             boostShot(&D,iteration,labSaveStep);    
+          boostShot(&D,iteration);    
+
           if(iteration>=D.maxT)   
           {
-             boostSaveField(&D,labSaveStep);
+//             boostSaveField(&D,labSaveStep);
              iteration=D.maxStep+1;
           }
+
        }
 
 

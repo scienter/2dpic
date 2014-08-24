@@ -305,9 +305,8 @@ void parameterSetting(Domain *D,External *Ext, char *input)
     
    //additional Boost parameters
    factor=D->gamma*(1+D->beta);
-   D->minT=(int)(boostSaveStart/factor/factor); 	//boost frame iteration
-   D->maxT=(int)((boostSaveStart+D->beta*D->nx)/(1+D->beta)-factor*D->gamma*D->minT*D->beta);	//boost frame iteration
-   D->boostSaveStep=boostSaveStep;
+   D->minT=(int)(D->maxStep/factor/factor); 	//boost frame iteration
+   D->maxT=(int)((D->maxStep+D->beta*D->nx)/(1+D->beta)-factor*D->gamma*D->minT*D->beta);	//boost frame iteration
 
    //additional external field parameters
    normalB=eMass*D->omega/(-eCharge);
