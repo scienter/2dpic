@@ -4,11 +4,13 @@
 #include "constants.h"
 #include "plasma.h"
 #include "mpi.h"
+#include <time.h>
 
 int main(int argc, char *argv[])
 {
     int i,j,k,n,iteration=0,filter,boost,filterStep,labSaveStep;
-    float factor;
+    float factor,time_spent;
+    clock_t begin,end;
     double t;
     char name[100];
     FILE *out;
@@ -70,7 +72,8 @@ int main(int argc, char *argv[])
     void MPI_TransferJ_DSX_Yplus();
     void rearrangeParticles();
 
- 
+     begin=clock();
+
     if(argc < 2) 
     {  
       printf("mpirun -np N show [inputFile] [dumpNum]\n"); 
@@ -256,8 +259,21 @@ int main(int argc, char *argv[])
 
     }     //end of time roop                  
 
+    end=clock();
+    time_spent=(end-begin)/CLOCKS_PER_SEC;
+
+    //make 'report' file
+    sprintf(name,"report");
+    out = fopen(name,"w");
+    fprintf(out,"nx=%d\n",D.nx);
+    fprintf(out,"ny=%d\n",D.ny);
+    fprintf(out,"cores=%d\n",nTasks);
+    fprintf(out,"running time=%gm\n",time_spent/60.0);
+    fclose(out);
+
     clean2D(&D);
 
+    
     MPI_Finalize();
 
     return 0;
