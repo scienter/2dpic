@@ -179,3 +179,98 @@ void loadLaser2D(Domain *D,LaserList *L,double t)
 
 }
 
+void loadLaserOpp2D(Domain *D,LaserList *L,double t)
+{
+   float rU,rD,longitudinal,t0,flat,loadPosition;
+   float zR,w0,z,w,phi,omega,k,y,pphi,amp;
+   int istart,iend,jstart,jend;
+   int positionX,positionY,rank,j,jC,laserOK=0;    
+   int myrank, nTasks;
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+   MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+
+   istart=D->istart;
+   iend=D->iend;
+   jstart=D->jstart;
+   jend=D->jend;
+
+
+   rU=L->rU*D->divisionLambda*D->dt;
+   rD=L->rD*D->divisionLambda*D->dt;
+   flat=L->flat*D->divisionLambda*D->dt*L->lambda/D->lambda;
+
+   jC=(int)(D->ny*0.5);	//center position
+
+   t0=2*rU;
+   zR=L->rayleighLength;
+   w0=L->beamWaist;  
+   loadPosition=L->loadPointX*D->dx;
+   z=loadPosition-L->focus;   
+   w=w0*sqrt(1.0+z*z/zR/zR);
+   phi=atan(z/zR);
+   omega=2*pi*L->omega/D->omega;
+   k=2*pi*D->lambda/L->lambda;
+
+   if(t<2*rU)
+      longitudinal=L->amplitude*exp(-(t-t0)*(t-t0)/rU/rU);
+   else if(t>=2*rU && t<2*rU+flat) 
+      longitudinal=L->amplitude*1.0;
+   else if(t>=2*rU+flat && t<2*rU+flat+2*rD) 
+      longitudinal=L->amplitude*exp(-(t-t0)*(t-t0)/rD/rD);
+   else if(t>=2*rU+2*rD+flat) 
+      longitudinal=0.0;
+/*
+   if(L->loadPointY>=D->minYSub && L->loadPointY<D->maxYSub)
+      rank=myrank;
+   else
+      rank=nTasks+1;
+*/
+
+   positionX=L->loadPointX+istart-D->minXSub-2;
+   positionY=L->loadPointY+jstart-D->minYSub;
+   if(positionX>D->minXSub && positionX<=D->maxXSub)
+      laserOK=1;
+
+
+   if(D->fieldType==1)
+   {
+     FieldDSX **field;
+     field=D->fieldDSX;
+
+     if(L->polarity==2 && laserOK==1)
+     {
+//         field[positionX][positionY].Pr=longitudinal*sin(omega*t);  
+
+//         field[positionX][positionY].Pl=longitudinal*sin(omega*t);
+
+       for(j=jstart; j<jend; j++)
+       {
+         y=(j-jstart+D->minYSub-jC)*D->dy;
+         pphi=-z/zR*y*y/w/w-0.5*phi-k*z-omega*t;
+         amp=longitudinal*sqrt(w0/w)*exp(-y*y/w/w)*sin(pphi);
+         field[positionX][j].Pr=amp;            
+         field[positionX][j].Pl=amp;
+       }
+
+     }           
+     else if(L->polarity==3 && laserOK==1)
+     {
+//         field[positionX][positionY].Sr=longitudinal*sin(omega*t);  
+
+//         field[positionX][positionY].Sl=longitudinal*sin(omega*t);
+
+       for(j=jstart; j<jend; j++)
+       {
+         y=(j-jstart+D->minYSub-jC)*D->dy;
+         pphi=-z/zR*y*y/w/w-0.5*phi-k*z-omega*t;
+         amp=longitudinal*sqrt(w0/w)*exp(-y*y/w/w)*sin(pphi);
+         field[positionX][j].Sr=amp;            
+         field[positionX][j].Sl=amp;
+       }
+
+     }
+   }     //End of fieldType=1
+
+}
+

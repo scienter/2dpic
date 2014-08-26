@@ -410,6 +410,8 @@ int findLaserParameters(int rank, LaserList *L,Domain *D,char *input)
      }
      if(FindParameters("Laser",rank,"flat",input,str)) L->flat=atof(str);
      else  L->flat=0.0;
+     if(FindParameters("Laser",rank,"direction",input,str)) L->direction=atoi(str);
+     else  L->direction=1;
 
      //additional laser parameters
      L->polarity=polarity;

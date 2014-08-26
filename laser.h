@@ -12,6 +12,7 @@ typedef struct _LaserList  {
    float rayleighLength;
    float beamWaist;
    float focus;
+   int direction;
 
    struct _LaserList *next;
 } LaserList;

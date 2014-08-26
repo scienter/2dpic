@@ -180,7 +180,8 @@ int main(int argc, char *argv[])
        if(D.boostOn==0)	{
          L=D.laserList;
          while(L->next)  {
-           loadLaser2D(&D,L,t); 
+           if(L->direction==1)     loadLaser2D(&D,L,t); 
+           else if(L->direction==-1)     loadLaserOpp2D(&D,L,t); 
            L=L->next;
          }
        }
