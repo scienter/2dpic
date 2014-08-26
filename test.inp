@@ -35,12 +35,14 @@
  boostSaveStep=50000
 
  divisionDirection=2
+ pmlCell=10
 
 [Laser]
  wavelength=1e-6
  a0=3
  rU=1			//number of wave lenth
  rD=1
+ flat=0
  polarity=2
  loadPositionX=1e-5		//laser start position [m]
  loadPositionY=1e-5		//laser start position [m]
@@ -76,4 +78,14 @@
  Ln1=1
  Ln2=1
  Ln3=1
+
+ Tnodes=4
+ Y0=10e-6
+ Y1=40e-6
+ Y2=9000e-6
+ Y3=9500e-6
+ Tn0=0
+ Tn1=1
+ Tn2=1
+ Tn3=1
 
