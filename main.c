@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 //          MPI_TransferF_XplusFilter(&D);
           filterField(&D);       
        }
-       
+/*       
        if(D.boostOn==1)
        {
           boostShot(&D,iteration);    
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
           }
 
        }
-
+*/
 
        //save File      
        if(iteration%D.saveStep==0 && iteration>=D.saveStart)   

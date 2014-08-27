@@ -23,9 +23,10 @@ void boostLoadLaser2D(Domain *D,LaserList *L)
    beta=D->beta;
 
    labWaist=L->beamWaist*D->lambda;
-   zR=pi/(L->lambda/D->gamma/(1.0+D->beta))*labWaist*labWaist/gamma/D->lambda;
+   zR=L->rayleighLength/gamma;
+//   zR=pi/(L->lambda/D->gamma/(1.0+D->beta))*labWaist*labWaist/gamma/D->lambda;
    w0=labWaist/D->lambda;  
-   f=-L->focus/gamma;   
+   f=-L->focus;   
    omega=k=2*pi;
    x0=-2*rU;
    unitCompen=gamma*gamma*(1.0-beta*beta);
@@ -37,27 +38,44 @@ void boostLoadLaser2D(Domain *D,LaserList *L)
 
      if(L->polarity==2)
      {
-       for(i=1; i<=D->nxSub; i++)
-         for(j=1; j<=D->nySub; j++)
+       for(i=2; i<D->nxSub+2; i++)
+         for(j=2; j<D->nySub+2; j++)
          {
-           x=(i+D->minXSub-1)*D->dx;
-           y=(j-1+D->minYSub-jC)*D->dy;
-           z=f+x+x0;          
+           x=(i+D->minXSub-2)*D->dx;
+           y=(j-2+D->minYSub-jC)*D->dy;
+           z=(f+x+x0);          
            w=w0*sqrt(1.0+z*z/zR/zR);
            if(x>=2*x0)
            {
              phi=atan(z/zR);
              pphi=z/zR*y*y/w/w-0.5*phi+unitCompen*k*z;
              amp=L->amplitude*sqrt(w0/w)*exp(-y*y/w/w)*sin(pphi)*exp(-(x-x0)*(x-x0)/rU/rU);
+//             amp=L->amplitude*sqrt(w0/w)*exp(-y*y/w/w)*sin(pphi);
              field[i][j].Pr=amp;            
-             field[i][j].Pl=amp;            
+//             field[i][j].Pl=amp;            
            }
            else      {
              field[i][j].Pr=0.0;            
-             field[i][j].Pl=0.0;            
+//             field[i][j].Pl=0.0;            
            }
+/*
+           z=(f+x+x0)-0.5*D->dx;          
+           w=w0*sqrt(1.0+z*z/zR/zR);
+           if(x>=2*x0-0.5*D->dx)
+           {
+             phi=atan(z/zR);
+             pphi=z/zR*y*y/w/w-0.5*phi+unitCompen*k*z;
+             amp=L->amplitude*sqrt(w0/w)*exp(-y*y/w/w)*sin(pphi)*exp(-(x-x0)*(x-x0)/rU/rU);
+//             amp=L->amplitude*sqrt(w0/w)*exp(-y*y/w/w)*sin(pphi);
+             field[i][j].PrC=amp;            
+//             field[i][j].PlC=amp;            
+           }
+           else      {
+             field[i][j].PrC=0.0;            
+//             field[i][j].PlC=0.0;            
+           }
+*/
          }
-
      }
      else if(L->polarity==3)
      {
