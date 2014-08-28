@@ -376,7 +376,7 @@ void MPI_TransferF_Yminus(Domain *D)
     else if(myrank%2==1)
        MPI_Send(btF,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
     MPI_Barrier(MPI_COMM_WORLD);
-
+/*
     //Transferring odd ~ even cores             
     start=0; 
     for(i=ibegin; i<ibottom; i++)
@@ -421,8 +421,9 @@ void MPI_TransferF_Yminus(Domain *D)
     }
     else if(myrank%2==0 && myrank!=0)
        MPI_Send(btF,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
+
     MPI_Barrier(MPI_COMM_WORLD);
-    
+*/    
     free(btF);
 }
 

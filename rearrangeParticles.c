@@ -11,7 +11,7 @@ void rearrangeParticles2D(Domain *D)
     Particle **particle;
     particle=D->particle;
 
-    int i,j,s,intX,intY,cnt,deleteFlag=0;
+    int i,j,s,intX=0,intY=0,cnt,deleteFlag=0;
     int istart,iend,jstart,jend;
     float x,y;
     ptclList *p,*New,*prev,*tmp;
@@ -54,7 +54,6 @@ void rearrangeParticles2D(Domain *D)
                 deleteFlag=1;
               } 
               else   intY=0;            
-  
               if(deleteFlag==1)
               {
                 New = (ptclList *)malloc(sizeof(ptclList)); 

@@ -146,7 +146,9 @@ void parameterSetting(Domain *D,External *Ext, char *input)
       fail=1;
    }
    if(FindParameters("Domain",1,"divisionLambda",input,str)) 
+   {
       D->divisionLambda=atof(str);
+   }
    else  {
       printf("In [Domain], divisionLambda=? [number of devided wavelength]\n");
       fail=1;
@@ -196,7 +198,17 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    //additional Domain parameters  
    D->dx=1.0/D->divisionLambda;
    D->dt=D->dx;   
-   D->dy=D->dx*dyoverdx/D->gamma/(1.0+D->beta);
+   D->dy=D->dx*dyoverdx/D->gamma/(1+D->beta);
+   if(D->dx*1.1>D->dy) 
+   {
+     while(D->dx*1.1>D->dy)
+     {
+       D->divisionLambda += 1;
+       D->dx=1.0/D->divisionLambda;
+       D->dt=D->dx;   
+     }
+   }
+   printf("gamma=%g, dx=%g, dy=%g, divisionLambda=%g\n",D->gamma,D->dx,D->dy,D->divisionLambda);
 /*
    tmpFloat=D->dx/(D->gamma*(1+D->beta));
    D->dy=tmpFloat*dyoverdx;

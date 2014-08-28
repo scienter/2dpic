@@ -97,8 +97,10 @@ int main(int argc, char *argv[])
         boostLoadLaser2D(&D,L);  
         L=L->next;
       }
+      MPI_TransferF_DSX_Yminus(&D);
+      MPI_TransferF_DSX_Yplus(&D);
     }
-
+/*
     //load plasma or load dump file
     if(argc >= 3)
     {   
@@ -128,7 +130,7 @@ int main(int argc, char *argv[])
 //          MPI_TransferF_XplusFilter(&D);
           filterField(&D);       
        }
-/*       
+       
        if(D.boostOn==1)
        {
           boostShot(&D,iteration);    
@@ -140,7 +142,7 @@ int main(int argc, char *argv[])
           }
 
        }
-*/
+
 
        //save File      
        if(iteration%D.saveStep==0 && iteration>=D.saveStart)   
@@ -215,6 +217,7 @@ int main(int argc, char *argv[])
 
        if(D.fieldType==1)
        {
+
          if(D.currentType==1)
            updateCurrent2D_DSX_1st(&D);
          else if(D.currentType==2)
@@ -223,6 +226,7 @@ int main(int argc, char *argv[])
            updateCurrent2D_DSX_3rd(&D);
          MPI_TransferJ_DSX_Yplus(&D);
          MPI_TransferJ_DSX_Yminus(&D);
+
        }
 
        if (iteration>=D.nx && D.moving==1 && D.boostOn==0)
@@ -259,10 +263,10 @@ int main(int argc, char *argv[])
        iteration+=1;
 
     }     //end of time roop                  
-
+*/
     end=clock();
     time_spent=(end-begin)/CLOCKS_PER_SEC;
-
+/*
     //make 'report' file
     sprintf(name,"report");
     out = fopen(name,"w");
@@ -273,7 +277,7 @@ int main(int argc, char *argv[])
     fclose(out);
 
     clean2D(&D);
-
+*/
     
     MPI_Finalize();
 

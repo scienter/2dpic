@@ -66,7 +66,7 @@ void loadMovingPlasma2DBoost(Domain *D)
                 *(posX-LL->lpoint[l])+LL->ln[l]);
              ne*=((LL->tn[t+1]-LL->tn[t])/(LL->tpoint[t+1]-LL->tpoint[t])
                 *(posY-LL->tpoint[t])+LL->tn[t]);
-             ne*=LL->numberInCell*D->beta;	//it is the float number of superparticles.
+             ne*=LL->numberInCell*beta[iter];	//it is the float number of superparticles.
              intNum=(int)ne;
              randTest=ne-intNum;
              cnt=0;
