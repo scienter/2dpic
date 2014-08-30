@@ -6,7 +6,7 @@
 
 void boundary(Domain *D,External *Ext)
 {
-     int i,j,s,rank,remain,tmp,sub,nxSub,nySub,numdataUp,numdataBt;
+     int i,j,s,rank,remain,tmp,sub,nxSub,nySub,numdataUp,numdataBt,numberData;
      float min,max;
      int myrank, nTasks;
      MPI_Status status;
@@ -173,6 +173,16 @@ printf("ny=%d, nySub=%d, minYSub=%d, maxYSub=%d\n",D->ny,D->nySub,D->minYSub,D->
          D->probe[i][j].Sr=0.0;
          D->probe[i][j].Sl=0.0;
        }
+
+    //Share Field
+    numberData=6*(D->nx+5)*D->numShareDn;
+    D->btF = (float *)malloc(numberData*sizeof(float ));
+    numberData=6*(D->nx+5)*D->numShareUp;
+    D->upF = (float *)malloc(numberData*sizeof(float ));
+    numberData=2*(D->nx+5)*D->numShareDn;
+    D->btFC = (float *)malloc(numberData*sizeof(float ));
+    numberData=4*(D->nx+5)*D->numShareUp;
+    D->upFC = (float *)malloc(numberData*sizeof(float ));
 
 }
                         

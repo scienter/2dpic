@@ -319,8 +319,8 @@ void MPI_TransferF_Yminus(Domain *D)
 
     nx=D->nx;
     nySub=D->nySub;
-    ibegin=1;
-    ibottom=nx+3;
+    ibegin=0;
+    ibottom=nx+5;
 
     istart=D->istart;
     iend=D->iend;
@@ -328,26 +328,26 @@ void MPI_TransferF_Yminus(Domain *D)
     jend=D->jend;
 
 
-    numberData=6*(nx+2);
+    numberData=6*(nx+5);
     btF=(float *)malloc(numberData*sizeof(float ));             
 
     //Transferring even ~ odd cores 
     start=0; 
     for(i=ibegin; i<ibottom; i++)
        btF[start+i]=field[i][jstart].E1;
-    start+=nx+2;
+    start+=nx+5;
     for(i=ibegin; i<ibottom; i++)
        btF[start+i]=field[i][jstart].B1;
-    start+=nx+2;
+    start+=nx+5;
     for(i=ibegin; i<ibottom; i++)
        btF[start+i]=field[i][jstart].Pr;
-    start+=nx+2;
+    start+=nx+5;
     for(i=ibegin; i<ibottom; i++)
        btF[start+i]=field[i][jstart].Pl;
-    start+=nx+2;
+    start+=nx+5;
     for(i=ibegin; i<ibottom; i++)
        btF[start+i]=field[i][jstart].Sr;
-    start+=nx+2;
+    start+=nx+5;
     for(i=ibegin; i<ibottom; i++)
        btF[start+i]=field[i][jstart].Sl;
         
@@ -356,22 +356,22 @@ void MPI_TransferF_Yminus(Domain *D)
        MPI_Recv(btF,numberData, MPI_FLOAT, myrank+1, myrank+1, MPI_COMM_WORLD,&status);  
        start=0;
        for(i=ibegin; i<ibottom; i++)
-          D->field[i][nySub+jstart].E1=btF[i+start];
-       start+=nx+2;
+          D->field[i][jend].E1=btF[i+start];
+       start+=nx+5;
        for(i=ibegin; i<ibottom; i++)
-          D->field[i][nySub+istart].B1=btF[i+start];
-       start+=nx+2;
+          D->field[i][jend].B1=btF[i+start];
+       start+=nx+5;
        for(i=ibegin; i<ibottom; i++)
-          D->field[i][nySub+istart].Pr=btF[i+start];
-       start+=nx+2;
+          D->field[i][jend].Pr=btF[i+start];
+       start+=nx+5;
        for(i=ibegin; i<ibottom; i++)
-          D->field[i][nySub+istart].Pl=btF[i+start];
-       start+=nx+2;
+          D->field[i][jend].Pl=btF[i+start];
+       start+=nx+5;
        for(i=ibegin; i<ibottom; i++)
-          D->field[i][nySub+istart].Sr=btF[i+start];
-       start+=nx+2;
+          D->field[i][jend].Sr=btF[i+start];
+       start+=nx+5;
        for(i=ibegin; i<ibottom; i++)
-          D->field[i][nySub+istart].Sl=btF[i+start];
+          D->field[i][jend].Sl=btF[i+start];
     }
     else if(myrank%2==1)
        MPI_Send(btF,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             

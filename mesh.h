@@ -31,6 +31,8 @@ typedef struct _Domain
    int maxXSub;
    int minYSub;        //Each core has start mesh point in total domain
    int maxYSub;
+   int numShareUp;			//sharing dummy lines
+   int numShareDn;			//sharing dummy lines
    int numberInCell;
    int moving;         //Moving domain option. 1:on
          
@@ -46,6 +48,10 @@ typedef struct _Domain
    
    double *upJ;
    double *btJ;
+   float *btF;
+   float *upF;
+   float *btFC;
+   float *upFC;
 
    struct _FieldDSX **fieldDSX;    
    struct _UpPML **UpPML;    

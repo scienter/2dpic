@@ -97,10 +97,10 @@ int main(int argc, char *argv[])
         boostLoadLaser2D(&D,L);  
         L=L->next;
       }
-      MPI_TransferF_DSX_Yminus(&D);
-      MPI_TransferF_DSX_Yplus(&D);
+      MPI_TransferF_DSX_Yminus(&D,D.numShareDn);
+      MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
     }
-/*
+
     //load plasma or load dump file
     if(argc >= 3)
     {   
@@ -195,14 +195,14 @@ int main(int argc, char *argv[])
        {
          absorpbing(&D);
          solveField2DC_DSX(&D);
-         MPI_TransferF_DSX_YminusC(&D);
-         MPI_TransferF_DSX_YplusC(&D);
+         MPI_TransferF_DSX_YminusC(&D,D.numShareDn);
+         MPI_TransferF_DSX_YplusC(&D,D.numShareUp);
 //       if(nTasks==1)  periodY1coreC(&D);   
 
          absorpbingC(&D);
          solveField2D_DSX(&D);
-         MPI_TransferF_DSX_Yminus(&D);
-         MPI_TransferF_DSX_Yplus(&D);
+         MPI_TransferF_DSX_Yminus(&D,D.numShareDn);
+         MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
        }
 
        if(D.currentType==1)
@@ -255,7 +255,6 @@ int main(int argc, char *argv[])
        }
 
 
-
        //time update
        t+=D.dt;  
        if(iteration%10==0 && myrank==0)  
@@ -263,10 +262,10 @@ int main(int argc, char *argv[])
        iteration+=1;
 
     }     //end of time roop                  
-*/
+
     end=clock();
     time_spent=(end-begin)/CLOCKS_PER_SEC;
-/*
+
     //make 'report' file
     sprintf(name,"report");
     out = fopen(name,"w");
@@ -277,7 +276,7 @@ int main(int argc, char *argv[])
     fclose(out);
 
     clean2D(&D);
-*/
+
     
     MPI_Finalize();
 

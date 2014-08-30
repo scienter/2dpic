@@ -33,6 +33,9 @@ void parameterSetting(Domain *D,External *Ext, char *input)
       printf("in [Domain], CurrentType=?  (1:1st, 2:2nd, 3:3rd Order)\n");
       fail=1;
    }
+   if(D->currentType==1)  { D->numShareUp=1; D->numShareDn=1; }
+   else if(D->currentType==2)  { D->numShareUp=2; D->numShareDn=3; }
+
 
    //Boost frame
    if(FindParameters("Domain",1,"boostGamma",input,str)) D->gamma=atof(str);
@@ -160,7 +163,7 @@ void parameterSetting(Domain *D,External *Ext, char *input)
       printf("in [Domain], pmlCell=? [ea]\n");
       fail=1;
    }
-   
+
 
    //External field parameter setting
    if(FindParameters("External",1,"E1",input,str)) E1=atof(str);

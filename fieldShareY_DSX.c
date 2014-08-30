@@ -310,10 +310,10 @@ void MPI_TransferJ_DSX_Yminus(Domain *D)
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
-void MPI_TransferF_DSX_Yminus(Domain *D)
+void MPI_TransferF_DSX_Yminus(Domain *D, int numShare)
 {
     int i,numberData,start,end,nx,nySub,ibegin,ibottom;
-    int istart,iend,jstart,jend;
+    int istart,iend,jstart,jend,col;
     int myrank, nTasks; 
     float *btF;
     FieldDSX **field;
@@ -326,8 +326,8 @@ void MPI_TransferF_DSX_Yminus(Domain *D)
 
     nx=D->nx;
     nySub=D->nySub;
-    ibegin=1;
-    ibottom=nx+3;
+    ibegin=0;
+    ibottom=nx+5;
 
     istart=D->istart;
     iend=D->iend;
@@ -335,108 +335,124 @@ void MPI_TransferF_DSX_Yminus(Domain *D)
     jend=D->jend;
 
 
-    numberData=6*(nx+2);
-    btF=(float *)malloc(numberData*sizeof(float ));             
+    numberData=6*(nx+5)*numShare;
+//    btF=(float *)malloc(numberData*sizeof(float ));             
 
     //Transferring even ~ odd cores 
     start=0; 
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].E1;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].B1;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].Pr;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].Pl;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].Sr;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].Sl;
-        
+    for(col=0; col<numShare; col++)
+    {
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].E1;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].B1;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].Pr;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].Pl;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].Sr;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].Sl;
+      start+=nx+5;
+    }
+          
     if(myrank%2==0 && myrank!=nTasks-1)
     {
-       MPI_Recv(btF,numberData, MPI_FLOAT, myrank+1, myrank+1, MPI_COMM_WORLD,&status);  
+       MPI_Recv(D->btF,numberData, MPI_FLOAT, myrank+1, myrank+1, MPI_COMM_WORLD,&status);  
        start=0;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+jstart].E1=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+istart].B1=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+istart].Pr=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+istart].Pl=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+istart].Sr=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+istart].Sl=btF[i+start];
+       for(col=0; col<numShare; col++)
+       {     
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].E1=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].B1=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].Pr=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].Pl=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].Sr=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].Sl=D->btF[i+start];
+         start+=nx+5;
+       }
     }
     else if(myrank%2==1)
-       MPI_Send(btF,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
+       MPI_Send(D->btF,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
     MPI_Barrier(MPI_COMM_WORLD);
 
     //Transferring odd ~ even cores             
     start=0; 
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].E1;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].B1;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].Pr;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].Pl;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].Sr;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].Sl;
-        
+    for(col=0; col<numShare; col++)
+    {
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].E1;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].B1;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].Pr;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].Pl;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].Sr;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btF[start+i]=field[i][jstart+col].Sl;
+      start+=nx+5;
+    }
+    
     if(myrank%2==1 && myrank!=nTasks-1)
     {
-       MPI_Recv(btF,numberData, MPI_FLOAT, myrank+1, myrank+1, MPI_COMM_WORLD,&status);  
+       MPI_Recv(D->btF,numberData, MPI_FLOAT, myrank+1, myrank+1, MPI_COMM_WORLD,&status);  
        start=0;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+jstart].E1=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+jstart].B1=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+jstart].Pr=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+jstart].Pl=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+jstart].Sr=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+jstart].Sl=btF[i+start];
+       for(col=0; col<numShare; col++)
+       {
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].E1=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].B1=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].Pr=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].Pl=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].Sr=D->btF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].Sl=D->btF[i+start];
+         start+=nx+5;
+       }
     }
     else if(myrank%2==0 && myrank!=0)
-       MPI_Send(btF,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
+       MPI_Send(D->btF,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
     MPI_Barrier(MPI_COMM_WORLD);
     
-    free(btF);
+//    free(btF);
 }
 
-void MPI_TransferF_DSX_YminusC(Domain *D)
+void MPI_TransferF_DSX_YminusC(Domain *D,int numShare)
 {
     int i,numberData,start,end,nx,nySub,ibegin,ibottom;
-    int istart,iend,jstart,jend;
+    int istart,iend,jstart,jend,col;
     int myrank, nTasks; 
     float *btF;
     FieldDSX **field;
@@ -446,8 +462,8 @@ void MPI_TransferF_DSX_YminusC(Domain *D)
 
     nx=D->nx;
     nySub=D->nySub;
-    ibegin=1;
-    ibottom=nx+3;   
+    ibegin=0;
+    ibottom=nx+5;   
 
     istart=D->istart;
     iend=D->iend;
@@ -457,60 +473,76 @@ void MPI_TransferF_DSX_YminusC(Domain *D)
     MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);            
 
-    numberData=2*(nx+2);
-    btF=(float *)malloc(numberData*sizeof(float ));             
+    numberData=2*(nx+5)*D->numShareDn;
+//    btF=(float *)malloc(numberData*sizeof(float ));             
 
     //Transferring even ~ odd cores 
     start=0; 
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].E1C;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].B1C;
-        
+    for(col=0; col<numShare; col++)
+    {
+      for(i=ibegin; i<ibottom; i++)
+         D->btFC[start+i]=field[i][jstart+col].E1C;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btFC[start+i]=field[i][jstart+col].B1C;
+      start+=nx+5;
+    }
+    
     if(myrank%2==0 && myrank!=nTasks-1)
     {
-       MPI_Recv(btF,numberData, MPI_FLOAT, myrank+1, myrank+1, MPI_COMM_WORLD,&status);  
+       MPI_Recv(D->btFC,numberData, MPI_FLOAT, myrank+1, myrank+1, MPI_COMM_WORLD,&status);  
        start=0;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+2].E1C=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+2].B1C=btF[i+start];
+       for(col=0; col<numShare; col++)
+       {
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].E1C=D->btFC[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].B1C=D->btFC[i+start];
+         start+=nx+5;
+       }
     }
     else if(myrank%2==1)
-       MPI_Send(btF,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
+       MPI_Send(D->btFC,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
     MPI_Barrier(MPI_COMM_WORLD);
 
     //Transferring odd ~ even cores             
     start=0; 
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].E1C;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       btF[start+i]=field[i][jstart].B1C;
+    for(col=0; col<numShare; col++)
+    {
+      for(i=ibegin; i<ibottom; i++)
+         D->btFC[start+i]=field[i][jstart+col].E1C;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->btFC[start+i]=field[i][jstart+col].B1C;
+      start+=nx+5;
+    }
         
     if(myrank%2==1 && myrank!=nTasks-1)
     {
-       MPI_Recv(btF,numberData, MPI_FLOAT, myrank+1, myrank+1, MPI_COMM_WORLD,&status);  
+       MPI_Recv(D->btFC,numberData, MPI_FLOAT, myrank+1, myrank+1, MPI_COMM_WORLD,&status);  
        start=0;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+jstart].E1C=btF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][nySub+jstart].B1C=btF[i+start];
+       for(col=0; col<numShare; col++)
+       {
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].E1C=D->btFC[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jend+col].B1C=D->btFC[i+start];
+         start+=nx+5;
+       }
     }
     else if(myrank%2==0 && myrank!=0)
-       MPI_Send(btF,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
+       MPI_Send(D->btFC,numberData, MPI_FLOAT, myrank-1, myrank, MPI_COMM_WORLD);             
     MPI_Barrier(MPI_COMM_WORLD);
     
-    free(btF);
+//    free(btF);
 }
 
-void MPI_TransferF_DSX_Yplus(Domain *D)
+void MPI_TransferF_DSX_Yplus(Domain *D, int numShare)
 {
     int i,numberData,start,end,nx,nySub,ibegin,ibottom;
-    int istart,iend,jstart,jend;
+    int istart,iend,jstart,jend,col;
     int myrank, nTasks; 
     float *upF;
     FieldDSX **field;
@@ -520,8 +552,8 @@ void MPI_TransferF_DSX_Yplus(Domain *D)
    
     nx=D->nx;
     nySub=D->nySub;
-    ibegin=1;
-    ibottom=nx+3;
+    ibegin=0;
+    ibottom=nx+5;
 
     istart=D->istart;
     iend=D->iend;
@@ -531,54 +563,62 @@ void MPI_TransferF_DSX_Yplus(Domain *D)
     MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);            
 
-    numberData=6*(nx+2);
-    upF=(float *)malloc(numberData*sizeof(float ));             
+    numberData=6*(nx+5)*numShare;
+//    upF=(float *)malloc(numberData*sizeof(float ));             
 
     //Transferring even ~ odd cores 
     
     if(myrank%2==1)
     {
-       MPI_Recv(upF,numberData, MPI_FLOAT, myrank-1, myrank-1, MPI_COMM_WORLD,&status);  
+       MPI_Recv(D->upF,numberData, MPI_FLOAT, myrank-1, myrank-1, MPI_COMM_WORLD,&status);  
        start=0;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].Pr=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].Pl=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].Sr=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].Sl=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].E1=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].B1=upF[i+start];
+       for(col=1; col<=numShare; col++)
+       {
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].Pr=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].Pl=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].Sr=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].Sl=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].E1=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].B1=D->upF[i+start];
+         start+=nx+5;
+       }
     }
     else if(myrank%2==0 && myrank!=nTasks-1)
     {
-      start=0; 
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].Pr;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].Pl;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].Sr;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].Sl;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].E1;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].B1;
-       MPI_Send(upF,numberData, MPI_FLOAT, myrank+1, myrank, MPI_COMM_WORLD);             
+      start=0;
+      for(col=1; col<=numShare; col++)
+      { 
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].Pr;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].Pl;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].Sr;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].Sl;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].E1;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].B1;
+        start+=nx+5;
+      }
+      MPI_Send(D->upF,numberData, MPI_FLOAT, myrank+1, myrank, MPI_COMM_WORLD);             
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -586,57 +626,64 @@ void MPI_TransferF_DSX_Yplus(Domain *D)
         
     if(myrank%2==0 && myrank!=0)
     {
-       MPI_Recv(upF,numberData, MPI_FLOAT, myrank-1, myrank-1, MPI_COMM_WORLD,&status);  
+       MPI_Recv(D->upF,numberData, MPI_FLOAT, myrank-1, myrank-1, MPI_COMM_WORLD,&status);  
        start=0;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].Pr=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].Pl=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].Sr=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].Sl=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].E1=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].B1=upF[i+start];
+       for(col=1; col<=numShare; col++)
+       {
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].Pr=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].Pl=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].Sr=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].Sl=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].E1=D->upF[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].B1=D->upF[i+start];
+         start+=nx+5;
+       }
     }
     else if(myrank%2==1 && myrank!=nTasks-1)
     {
       start=0; 
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].Pr;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].Pl;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].Sr;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].Sl;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].E1;
-      start+=nx+2;
-      for(i=ibegin; i<ibottom; i++)
-         upF[start+i]=field[i][nySub+1].B1;
-       MPI_Send(upF,numberData, MPI_FLOAT, myrank+1, myrank, MPI_COMM_WORLD);             
+      for(col=1; col<=numShare; col++)
+      { 
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].Pr;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].Pl;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].Sr;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].Sl;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].E1;
+        start+=nx+5;
+        for(i=ibegin; i<ibottom; i++)
+           D->upF[start+i]=field[i][jend-col].B1;
+      }
+       MPI_Send(D->upF,numberData, MPI_FLOAT, myrank+1, myrank, MPI_COMM_WORLD);             
     }
     MPI_Barrier(MPI_COMM_WORLD);
     
-    free(upF);
+//    free(upF);
 }
 
-void MPI_TransferF_DSX_YplusC(Domain *D)
+void MPI_TransferF_DSX_YplusC(Domain *D,int numShare)
 {
     int i,numberData,start,end,nx,nySub,ibegin,ibottom;
-    int istart,iend,jstart,jend;
+    int istart,iend,jstart,jend,col;
     int myrank, nTasks; 
     float *upF;
     FieldDSX **field;
@@ -646,8 +693,8 @@ void MPI_TransferF_DSX_YplusC(Domain *D)
    
     nx=D->nx;
     nySub=D->nySub;
-    ibegin=1;
-    ibottom=nx+3;
+    ibegin=0;
+    ibottom=nx+5;
 
     istart=D->istart;
     iend=D->iend;
@@ -657,77 +704,93 @@ void MPI_TransferF_DSX_YplusC(Domain *D)
     MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);            
 
-    numberData=4*(D->nx+2);
-    upF=(float *)malloc(numberData*sizeof(float ));             
+    numberData=4*(D->nx+5)*D->numShareUp;
+//    upF=(float *)malloc(numberData*sizeof(float ));             
 
     //Transferring even ~ odd cores 
     start=0; 
-    for(i=ibegin; i<ibottom; i++)
-       upF[start+i]=field[i][nySub+1].PrC;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       upF[start+i]=field[i][nySub+1].PlC;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       upF[start+i]=field[i][nySub+1].SrC;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       upF[start+i]=field[i][nySub+1].SlC;
-    
+    for(col=1; col<=numShare; col++)
+    {
+      for(i=ibegin; i<ibottom; i++)
+         D->upFC[start+i]=field[i][jend-col].PrC;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->upFC[start+i]=field[i][jend-col].PlC;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->upFC[start+i]=field[i][jend-col].SrC;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->upFC[start+i]=field[i][jend-col].SlC;
+      start+=nx+5;
+    }
+      
     if(myrank%2==1)
     {
-       MPI_Recv(upF,numberData, MPI_FLOAT, myrank-1, myrank-1, MPI_COMM_WORLD,&status);  
+       MPI_Recv(D->upFC,numberData, MPI_FLOAT, myrank-1, myrank-1, MPI_COMM_WORLD,&status);  
        start=0;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].PrC=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].PlC=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].SrC=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].SlC=upF[i+start];
+       for(col=1; col<=numShare; col++)
+       {
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].PrC=D->upFC[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].PlC=D->upFC[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].SrC=D->upFC[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].SlC=D->upFC[i+start];
+         start+=nx+5;
+       }
     }
     else if(myrank%2==0 && myrank!=nTasks-1)
-       MPI_Send(upF,numberData, MPI_FLOAT, myrank+1, myrank, MPI_COMM_WORLD);             
+       MPI_Send(D->upFC,numberData, MPI_FLOAT, myrank+1, myrank, MPI_COMM_WORLD);             
     MPI_Barrier(MPI_COMM_WORLD);
 
     //Transferring odd ~ even cores             
     start=0; 
-    for(i=ibegin; i<ibottom; i++)
-       upF[start+i]=field[i][nySub+1].PrC;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       upF[start+i]=field[i][nySub+1].PlC;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       upF[start+i]=field[i][nySub+1].SrC;
-    start+=nx+2;
-    for(i=ibegin; i<ibottom; i++)
-       upF[start+i]=field[i][nySub+1].SlC;
+    for(col=1; col<=numShare; col++)
+    {
+      for(i=ibegin; i<ibottom; i++)
+         D->upFC[start+i]=field[i][jend-col].PrC;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->upFC[start+i]=field[i][jend-col].PlC;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->upFC[start+i]=field[i][jend-col].SrC;
+      start+=nx+5;
+      for(i=ibegin; i<ibottom; i++)
+         D->upFC[start+i]=field[i][jend-col].SlC;
+      start+=nx+5;
+    }
         
     if(myrank%2==0 && myrank!=0)
     {
-       MPI_Recv(upF,numberData, MPI_FLOAT, myrank-1, myrank-1, MPI_COMM_WORLD,&status);  
+       MPI_Recv(D->upFC,numberData, MPI_FLOAT, myrank-1, myrank-1, MPI_COMM_WORLD,&status);  
        start=0;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].PrC=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].PlC=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].SrC=upF[i+start];
-       start+=nx+2;
-       for(i=ibegin; i<ibottom; i++)
-          field[i][1].SlC=upF[i+start];
+       for(col=1; col<=numShare; col++)
+       {
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].PrC=D->upFC[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].PlC=D->upFC[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].SrC=D->upFC[i+start];
+         start+=nx+5;
+         for(i=ibegin; i<ibottom; i++)
+            field[i][jstart-col].SlC=D->upFC[i+start];
+         start+=nx+5;
+       }
     }
     else if(myrank%2==1 && myrank!=nTasks-1)
-       MPI_Send(upF,numberData, MPI_FLOAT, myrank+1, myrank, MPI_COMM_WORLD);             
+       MPI_Send(D->upFC,numberData, MPI_FLOAT, myrank+1, myrank, MPI_COMM_WORLD);             
     MPI_Barrier(MPI_COMM_WORLD);
     
-    free(upF);
+//    free(upF);
 }
 
