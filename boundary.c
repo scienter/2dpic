@@ -98,7 +98,7 @@ printf("ny=%d, nySub=%d, minYSub=%d, maxYSub=%d\n",D->ny,D->nySub,D->minYSub,D->
            D->fieldDSX[i][j].J2Old=0.0; 
            D->fieldDSX[i][j].J3Old=0.0; 
          } 
-
+/*
        D->UpPML = (UpPML **)malloc((D->nxSub+5)*sizeof(UpPML *));
        for(i=0; i<D->nxSub+5; i++) 
          D->UpPML[i] = (UpPML *)malloc((10)*sizeof(UpPML ));     
@@ -121,13 +121,14 @@ printf("ny=%d, nySub=%d, minYSub=%d, maxYSub=%d\n",D->ny,D->nySub,D->minYSub,D->
            D->UpPML[i][j].By=0.0;
            D->UpPML[i][j].Bz=0.0;
          }
+*/
      }	//End of DSX
    
      D->particle = (Particle **)malloc((D->nxSub+3)*sizeof(Particle *));
      for(i=0; i<D->nxSub+3; i++) 
        D->particle[i] = (Particle *)malloc((D->nySub+3)*sizeof(Particle ));
     // setting up particle's pointer
-     for(i=0; i<D->iend+1; i++)
+     for(i=0; i<D->iend+1; i++)	//i starts at 0 because of boost frame
        for(j=D->jstart-1; j<D->jend+1; j++)
        {
          D->particle[i][j].rho=0.0;  
@@ -145,7 +146,7 @@ printf("ny=%d, nySub=%d, minYSub=%d, maxYSub=%d\n",D->ny,D->nySub,D->minYSub,D->
     D->upJ=(double *)malloc(numdataUp*sizeof(double ));
     D->btJ=(double *)malloc(numdataBt*sizeof(double ));
 
-
+/*
      D->boost = (Boost **)malloc((D->nxSub+5)*sizeof(Boost ));
      for(i=0; i<D->nxSub+5; i++) 
        D->boost[i] = (Boost *)malloc((D->nySub+5)*sizeof(Boost ));
@@ -159,7 +160,7 @@ printf("ny=%d, nySub=%d, minYSub=%d, maxYSub=%d\n",D->ny,D->nySub,D->minYSub,D->
          D->boost[i][j].Sr=0.0;
          D->boost[i][j].Sl=0.0;
        }
-
+*/
      D->probe = (Probe **)malloc(D->probeNum*sizeof(Probe *));
      for(i=0; i<D->probeNum; i++)
        D->probe[i] = (Probe *)malloc((D->maxStep+1)*sizeof(Probe ));

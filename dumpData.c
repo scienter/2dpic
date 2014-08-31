@@ -29,13 +29,11 @@ void saveDump2D(Domain D,int iteration)
    out = fopen(name, "w");   
 
    // Save simulation Domain information
-   fwrite(&(D.nxSub),sizeof(int),1,out);
-   fwrite(&(D.nySub),sizeof(int),1,out);
    fwrite(&(D.minXSub),sizeof(int),1,out);
    fwrite(&(D.maxXSub),sizeof(int),1,out);
    fwrite(&(D.minYSub),sizeof(int),1,out);
    fwrite(&(D.maxYSub),sizeof(int),1,out);
-   fwrite(&(D.probeNum),sizeof(int),1,out);
+   fwrite(&(D.maxStep),sizeof(int),1,out);
 
    // Save informations of particles inside the domain
    for(s=0; s<D.nSpecies; s++)
@@ -117,7 +115,7 @@ void restoreData2D(Domain *D, int iteration)
 {
    FILE *in;
    char name[100];
-   int i,j,istart,iend,jstart,jend,n,s,cnt;
+   int i,j,istart,iend,jstart,jend,n,s,cnt,maxStep;
    float tmp;
    double tmp1;
    ptclList *p;
@@ -137,13 +135,11 @@ void restoreData2D(Domain *D, int iteration)
    in = fopen(name, "r");   
 
    // restore simulation Domain information
-   fread(&(D->nxSub),sizeof(int),1,in);
-   fread(&(D->nySub),sizeof(int),1,in);
    fread(&(D->minXSub),sizeof(int),1,in);
    fread(&(D->maxXSub),sizeof(int),1,in);
    fread(&(D->minYSub),sizeof(int),1,in);
    fread(&(D->maxYSub),sizeof(int),1,in);
-   fread(&(D->probeNum),sizeof(int),1,in);
+   fread(&(maxStep),sizeof(int),1,in);
 
    // restore informations of particles inside the domain
    for(s=0; s<D->nSpecies; s++)
@@ -200,7 +196,7 @@ void restoreData2D(Domain *D, int iteration)
    if(D->probeNum>0)
    {
      for(n=0; n<D->probeNum; n++)
-       for(i=0; i<=D->maxStep; i++)
+       for(i=0; i<=maxStep; i++)
        { 
          fread(&(probe[n][i].Pr),sizeof(float),1,in);   
          fread(&(probe[n][i].Pl),sizeof(float),1,in);   

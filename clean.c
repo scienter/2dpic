@@ -87,6 +87,7 @@ void clean2D(Domain *D)
       free(D->probeX);
       free(D->probeY);
     }
+
 /*
     //remove boost field
     Boost **boost;

@@ -15,7 +15,7 @@ void removeEdge2DBoost(Domain *D)
     jend=D->jend;
 
     //remove left boundary
-    for(i=0; i<2; i++)
+    for(i=0; i<istart; i++)
     {
       for(s=0; s<D->nSpecies; s++)
         for(j=jstart-1; j<=jend; j++)
@@ -31,7 +31,8 @@ void removeEdge2DBoost(Domain *D)
           }
         }
     }
-/*
+    
+
     //remove right boundary
     i=iend;
     for(s=0; s<D->nSpecies; s++)
@@ -47,7 +48,7 @@ void removeEdge2DBoost(Domain *D)
           p=particle[i][j].head[s]->pt;
         }
       }
-*/
+
     //remove up boundary
     j=jend;
     for(s=0; s<D->nSpecies; s++)
@@ -81,6 +82,7 @@ void removeEdge2DBoost(Domain *D)
       }
 
 }
+
 void removeEdge2D(Domain *D)
 {
     int i,j,istart,iend,jstart,jend,s;
