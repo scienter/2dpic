@@ -137,8 +137,6 @@ void restoreData2D(Domain *D, int iteration)
    in = fopen(name, "r");   
 
    // restore simulation Domain information
-   fread(&(D->nxSub),sizeof(int),1,in);
-   fread(&(D->nySub),sizeof(int),1,in);
    fread(&(D->minXSub),sizeof(int),1,in);
    fread(&(D->maxXSub),sizeof(int),1,in);
    fread(&(D->minYSub),sizeof(int),1,in);
