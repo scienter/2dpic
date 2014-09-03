@@ -186,7 +186,7 @@ void interpolation2D_2nd(Domain *D,External *Ext)  //bicubic
    {   
      FieldDSX **field;
      field=D->fieldDSX;
-     float Pr[16],Pl[16],Sr[16],Sl[16],E1[16],B1[16];
+     double Pr[16],Pl[16],Sr[16],Sl[16],E1[16],B1[16];
 
      for(i=istart; i<iend; i++)
        for(j=jstart; j<jend; j++)
@@ -207,18 +207,18 @@ void interpolation2D_2nd(Domain *D,External *Ext)  //bicubic
              Pr[1]=field[ii][jj+1].Pr;
              Pr[2]=field[ii+1][jj+1].Pr;
              Pr[3]=field[ii+1][jj].Pr;
-             Pr[4]=field[ii+1][jj].Pr-field[ii-1][jj].Pr;
-             Pr[5]=field[ii+1][jj+1].Pr-field[ii-1][jj+1].Pr;
-             Pr[6]=field[ii+2][jj+1].Pr-field[ii][jj+1].Pr;
-             Pr[7]=field[ii+2][jj].Pr-field[ii][jj].Pr;
-             Pr[8]=field[ii][jj+1].Pr-field[ii][jj-1].Pr;
-             Pr[9]=field[ii][jj+2].Pr-field[ii][jj].Pr;
-             Pr[10]=field[ii+1][jj+2].Pr-field[ii+1][jj].Pr;
-             Pr[11]=field[ii+1][jj+1].Pr-field[ii+1][jj-1].Pr;
-             Pr[12]=field[ii+1][jj+1].Pr+field[ii-1][jj-1].Pr-field[ii-1][jj+1].Pr-field[ii+1][jj-1].Pr;
-             Pr[13]=field[ii+1][jj+2].Pr+field[ii-1][jj].Pr-field[ii-1][jj+2].Pr-field[ii+1][jj].Pr;
-             Pr[14]=field[ii+2][jj+2].Pr+field[ii][jj].Pr-field[ii][jj+2].Pr-field[ii+2][jj].Pr;
-             Pr[15]=field[ii+2][jj+1].Pr+field[ii][jj-1].Pr-field[ii][jj+1].Pr-field[ii+2][jj-1].Pr;
+             Pr[4]=(field[ii+1][jj].Pr-field[ii-1][jj].Pr)*0.5;
+             Pr[5]=(field[ii+1][jj+1].Pr-field[ii-1][jj+1].Pr)*0.5;
+             Pr[6]=(field[ii+2][jj+1].Pr-field[ii][jj+1].Pr)*0.5;
+             Pr[7]=(field[ii+2][jj].Pr-field[ii][jj].Pr)*0.5;
+             Pr[8]=(field[ii][jj+1].Pr-field[ii][jj-1].Pr)*0.5;
+             Pr[9]=(field[ii][jj+2].Pr-field[ii][jj].Pr)*0.5;
+             Pr[10]=(field[ii+1][jj+2].Pr-field[ii+1][jj].Pr)*0.5;
+             Pr[11]=(field[ii+1][jj+1].Pr-field[ii+1][jj-1].Pr)*0.5;
+             Pr[12]=(field[ii+1][jj+1].Pr+field[ii-1][jj-1].Pr-field[ii-1][jj+1].Pr-field[ii+1][jj-1].Pr)*0.25;
+             Pr[13]=(field[ii+1][jj+2].Pr+field[ii-1][jj].Pr-field[ii-1][jj+2].Pr-field[ii+1][jj].Pr)*0.25;
+             Pr[14]=(field[ii+2][jj+2].Pr+field[ii][jj].Pr-field[ii][jj+2].Pr-field[ii+2][jj].Pr)*0.25;
+             Pr[15]=(field[ii+2][jj+1].Pr+field[ii][jj-1].Pr-field[ii][jj+1].Pr-field[ii+2][jj-1].Pr)*0.25;
 
              Pl[0]=field[ii][jj].Pl;
              Pl[1]=field[ii][jj+1].Pl;
@@ -309,8 +309,8 @@ void interpolation2D_2nd(Domain *D,External *Ext)  //bicubic
              p->Pl=bicubic(Pl,wt,xx,yy)+extPl;
              p->Sr=bicubic(Sr,wt,xx,yy)+extSr;
              p->Sl=bicubic(Sl,wt,xx,yy)+extSl;
-             p->E1=bicubic(E1,wt,xx,yy)+extE1;
-             p->B1=bicubic(B1,wt,xx,yy)+extB1;
+             p->E1=bicubic(E1,wt,x,y)+extE1;
+             p->B1=bicubic(B1,wt,x,y)+extB1;
 
 //             p->E1=E1+extE1; p->Pr=Pr+extPr; p->Pl=Pl+extPl;
 
@@ -385,7 +385,9 @@ void interpolation2D_1st(Domain *D,External *Ext)
              x=p->x;  y=p->y;
              i1=(int)(i+x+0.5);
              j1=(int)(j+y+0.5);
-             x1=x+i-i1;  y1=y+j-j1;
+             x1=x+0.5-((int)(x+0.5));
+             y1=y+0.5-((int)(y+0.5));
+//             x1=x+i-i1;  y1=y+j-j1;
 
              E1=(1-x)*(1-y)*field[i][j].E1+x*y*field[i+1][j+1].E1+x*(1-y)*field[i+1][j].E1+(1-x)*y*field[i][j+1].E1;
              B1=(1-x)*(1-y)*field[i][j].B1+x*y*field[i+1][j+1].B1+x*(1-y)*field[i+1][j].B1+(1-x)*y*field[i][j+1].B1;
@@ -407,7 +409,7 @@ void interpolation2D_1st(Domain *D,External *Ext)
 }
 
 
-double bicubic(double *data, int wt[][16], double x, double y)
+double bicubic(double data[], int wt[][16], double x, double y)
 {
    int m,n,cnt;
    float coef[4][4] = {0,0,0,0,

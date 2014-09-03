@@ -205,14 +205,14 @@ int main(int argc, char *argv[])
          MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
        }
 
-       if(D.currentType==1 || D.currentType==2)
+       if(D.currentType==1 || D.currentType==2 ||D.currentType==3)
          interpolation2D_1st(&D,&Ext);
-       else if(D.currentType==3)
-         interpolation2D_2nd(&D,&Ext);
+//       else if(D.currentType==3)
+//         interpolation2D_2nd(&D,&Ext);
 //       else if(D.currentType==3)
 //         interpolation2D_3rd(&D,&Ext);
 
-/*
+
        particlePush2D(&D);
 
        if(D.fieldType==1)
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
           MPI_TransferP_Yplus(&D);
           removeEdge2D(&D);
        }
-*/
+
        //time update
        t+=D.dt;  
        if(iteration%10==0 && myrank==0)  
