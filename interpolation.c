@@ -266,16 +266,18 @@ void interpolation2D_1st(Domain *D,External *Ext)
            while(p)
            {
              x=p->x;  y=p->y;
-             i1=(int)(i+x+0.5);
-             j1=(int)(j+y+0.5);
-             x1=x+i-i1;  y1=y+j-j1;
+             i1=(int)(i+x+0.5)-1;
+             j1=(int)(j+y+0.5)-1;
+             x1=x+0.5-((int)(x+0.5));
+             y1=y+0.5-((int)(y+0.5));
+
+             Pr=(1-x1)*(1-y1)*field[i1][j1].Pr+(x1)*(y1)*field[i1+1][j1+1].Pr+(1-x1)*(y1)*field[i1][j1+1].Pr+(x1)*(1-y1)*field[i1+1][j1].Pr;
+             Pl=(1-x1)*(1-y1)*field[i1][j1].Pl+(x1)*(y1)*field[i1+1][j1+1].Pl+(1-x1)*(y1)*field[i1][j1+1].Pl+(x1)*(1-y1)*field[i1+1][j1].Pl;
+             Sr=(1-x1)*(1-y1)*field[i1][j1].Sr+(x1)*(y1)*field[i1+1][j1+1].Sr+(1-x1)*(y1)*field[i1][j1+1].Sr+(x1)*(1-y1)*field[i1+1][j1].Sr;
+             Sl=(1-x1)*(1-y1)*field[i1][j1].Sl+(x1)*(y1)*field[i1+1][j1+1].Sl+(1-x1)*(y1)*field[i1][j1+1].Sl+(x1)*(1-y1)*field[i1+1][j1].Sl;
 
              E1=(1-x)*(1-y)*field[i][j].E1+x*y*field[i+1][j+1].E1+x*(1-y)*field[i+1][j].E1+(1-x)*y*field[i][j+1].E1;
              B1=(1-x)*(1-y)*field[i][j].B1+x*y*field[i+1][j+1].B1+x*(1-y)*field[i+1][j].B1+(1-x)*y*field[i][j+1].B1;
-             Pr=(0.5-x1)*(0.5-y1)*field[i1-1][j1-1].Pr+(0.5+x1)*(0.5+y1)*field[i1][j1].Pr+(0.5-x1)*(0.5+y1)*field[i1-1][j1].Pr+(0.5+x1)*(0.5-y1)*field[i1][j1-1].Pr;
-             Pl=(0.5-x1)*(0.5-y1)*field[i1-1][j1-1].Pl+(0.5+x1)*(0.5+y1)*field[i1][j1].Pl+(0.5-x1)*(0.5+y1)*field[i1-1][j1].Pl+(0.5+x1)*(0.5-y1)*field[i1][j1-1].Pl;
-             Sr=(0.5-x1)*(0.5-y1)*field[i1-1][j1-1].Sr+(0.5+x1)*(0.5+y1)*field[i1][j1].Sr+(0.5-x1)*(0.5+y1)*field[i1-1][j1].Sr+(0.5+x1)*(0.5-y1)*field[i1][j1-1].Sr;
-             Sl=(0.5-x1)*(0.5-y1)*field[i1-1][j1-1].Sl+(0.5+x1)*(0.5+y1)*field[i1][j1].Sl+(0.5-x1)*(0.5+y1)*field[i1-1][j1].Sl+(0.5+x1)*(0.5-y1)*field[i1][j1-1].Sl;
 
              p->E1=E1+extE1; p->Pr=Pr+extPr; p->Pl=Pl+extPl;
              p->B1=B1+extB1; p->Sr=Sr+extSr; p->Sl=Sl+extSl;
