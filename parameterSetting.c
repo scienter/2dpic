@@ -33,8 +33,11 @@ void parameterSetting(Domain *D,External *Ext, char *input)
       printf("in [Domain], CurrentType=?  (1:1st, 2:2nd, 3:3rd Order)\n");
       fail=1;
    }
-   if(D->currentType==1)  { D->numShareUp=1; D->numShareDn=1; }
-   else if(D->currentType==2)  { D->numShareUp=2; D->numShareDn=3; }
+   if(FindParameters("Domain",1,"InterpolationType",input,str)) D->interpolationType=atoi(str);
+   else 
+      D->interpolationType=1;
+   if(D->interpolationType==1)  { D->numShareUp=1; D->numShareDn=1; }
+   else if(D->interpolationType==2)  { D->numShareUp=2; D->numShareDn=3; }
 
 
    //Boost frame

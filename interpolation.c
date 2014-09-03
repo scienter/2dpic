@@ -200,15 +200,14 @@ void interpolation2D_2nd(Domain *D,External *Ext)
                +Wx1*Wy2*field[i-1][j+0].Sl+Wx2*Wy2*field[i+0][j+0].Sl+Wx3*Wy2*field[i+1][j+0].Sl
                +Wx1*Wy3*field[i-1][j+1].Sl+Wx2*Wy3*field[i+0][j+1].Sl+Wx3*Wy3*field[i+1][j+1].Sl;
 
-             alpha=x+i;  beta=y+j; 
-             ii=(int)(alpha+0.5);  jj=(int)(beta+0.5);
-             x=alpha-ii;           y=beta-jj;             
-             Wx1=0.5*(0.5-x)*(0.5-x);
-             Wx2=0.75-x*x;
-             Wx3=0.5*(0.5+x)*(0.5+x);
-             Wy1=0.5*(0.5-y)*(0.5-y);
-             Wy2=0.75-y*y;
-             Wy3=0.5*(0.5+y)*(0.5+y);
+             ii=(int)(x+i+0.5);  jj=(int)(y+j+0.5);
+             alpha=x-((int)(x+0.5));           beta=y-((int)(y+0.5));             
+             Wx1=0.5*(0.5-alpha)*(0.5-alpha);
+             Wx2=0.75-alpha*alpha;
+             Wx3=0.5*(0.5+alpha)*(0.5+alpha);
+             Wy1=0.5*(0.5-beta)*(0.5-beta);
+             Wy2=0.75-beta*beta;
+             Wy3=0.5*(0.5+beta)*(0.5+beta);
             
              E1=Wx1*Wy1*field[ii-1][jj-1].E1+Wx2*Wy1*field[ii+0][jj-1].E1+Wx3*Wy1*field[ii+1][jj-1].E1
                +Wx1*Wy2*field[ii-1][jj+0].E1+Wx2*Wy2*field[ii+0][jj+0].E1+Wx3*Wy2*field[ii+1][jj+0].E1

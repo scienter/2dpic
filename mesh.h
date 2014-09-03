@@ -9,6 +9,7 @@ typedef struct _Domain
 {
    int fieldType;
    int currentType;
+   int interpolationType;
 
    int maxStep;
    int saveStep;

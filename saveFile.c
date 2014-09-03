@@ -208,8 +208,8 @@ void saveField2D(Domain *D,int iteration)
       {
         for(j=jstart; j<jend; j++)
         {
-          x=(i-2+D->minXSub)*D->dx*D->lambda;
-          y=(j-2+D->minYSub)*D->dy*D->lambda;
+          x=(i-2+D->minXSub+0.5)*D->dx*D->lambda;
+          y=(j-2+D->minYSub+0.5)*D->dy*D->lambda;
           Ex=field[i][j].E1;    
           Ey=field[i][j].Pr+field[i][j].Pl;
           Ez=field[i][j].Sr+field[i][j].Sl;
