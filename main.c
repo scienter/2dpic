@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 //       else if(D.currentType==3)
 //         interpolation2D_3rd(&D,&Ext);
 
-/*
+
        particlePush2D(&D);
 
        if(D.fieldType==1)
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
           MPI_TransferP_Yplus(&D);
           removeEdge2D(&D);
        }
-*/
+
        //time update
        t+=D.dt;  
        if(iteration%10==0 && myrank==0)  
