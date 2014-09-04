@@ -307,8 +307,13 @@ void saveParticle(Domain *D,int iteration)
              p3=p->p3;
              gamma=sqrt(1.0+p->p1*p->p1+p->p2*p->p2+p->p3*p->p3);
              index=p->index;
+<<<<<<< HEAD
 //             fprintf(out,"%g %g %g %g %g %g %g\n",x,y,p1,p2,p3,gamma,index);               
              fprintf(out,"%g %g %g %g\n",x,y,p->Pr,p->Pl);               
+=======
+             fprintf(out,"%g %g %g %g %g %g %g\n",x,y,p1,p2,p3,gamma,index);               
+//             fprintf(out,"%g %g %g %g\n",x,y,p->Pr,p->Pl);               
+>>>>>>> dev
              p=p->next;
           }
         }		//End of for(i,j)
