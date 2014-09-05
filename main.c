@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
     fprintf(out,"running time=%gm\n",time_spent/60.0);
     fclose(out);
 
-//    clean2D(&D);
+    clean2D(&D);
     
     MPI_Finalize();
 
