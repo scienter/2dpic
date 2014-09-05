@@ -5,6 +5,7 @@
 #include "plasma.h"
 #include "mpi.h"
 #include <time.h>
+//d
 
 int main(int argc, char *argv[])
 {
@@ -205,19 +206,17 @@ int main(int argc, char *argv[])
          MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
        }
 
-<<<<<<< HEAD
        if(D.interpolationType==1)
          interpolation2D_1st(&D,&Ext);
        else if(D.interpolationType==2)
          interpolation2D_2nd(&D,&Ext);
-=======
-       if(D.currentType==1 || D.currentType==2 ||D.currentType==3)
+
+       if(D.currentType==1)
          interpolation2D_1st(&D,&Ext);
-//       else if(D.currentType==3)
-//         interpolation2D_2nd(&D,&Ext);
->>>>>>> dev
-//       else if(D.currentType==3)
-//         interpolation2D_3rd(&D,&Ext);
+       else if(D.currentType==2)
+         interpolation2D_2nd(&D,&Ext);
+       else if(D.currentType==3)
+         interpolation2D_3rd(&D,&Ext);
 
 
        particlePush2D(&D);
