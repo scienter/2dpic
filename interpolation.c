@@ -314,7 +314,6 @@ void interpolation2D_2nd(Domain *D,External *Ext)  //bicubic
 
 //             p->E1=E1+extE1; p->Pr=Pr+extPr; p->Pl=Pl+extPl;
 
-<<<<<<< HEAD
              ii=(int)(x+i+0.5);  jj=(int)(y+j+0.5);
              alpha=x-((int)(x+0.5));           beta=y-((int)(y+0.5));             
              Wx1=0.5*(0.5-alpha)*(0.5-alpha);
@@ -323,7 +322,6 @@ void interpolation2D_2nd(Domain *D,External *Ext)  //bicubic
              Wy1=0.5*(0.5-beta)*(0.5-beta);
              Wy2=0.75-beta*beta;
              Wy3=0.5*(0.5+beta)*(0.5+beta);
-=======
 /*
                
              alpha=x+i;  beta=y+j; 
@@ -394,7 +392,6 @@ void interpolation2D_1st(Domain *D,External *Ext)
            while(p)
            {
              x=p->x;  y=p->y;
-<<<<<<< HEAD
              i1=(int)(i+x+0.5)-1;
              j1=(int)(j+y+0.5)-1;
              x1=x+0.5-((int)(x+0.5));
@@ -404,13 +401,11 @@ void interpolation2D_1st(Domain *D,External *Ext)
              Pl=(1-x1)*(1-y1)*field[i1][j1].Pl+(x1)*(y1)*field[i1+1][j1+1].Pl+(1-x1)*(y1)*field[i1][j1+1].Pl+(x1)*(1-y1)*field[i1+1][j1].Pl;
              Sr=(1-x1)*(1-y1)*field[i1][j1].Sr+(x1)*(y1)*field[i1+1][j1+1].Sr+(1-x1)*(y1)*field[i1][j1+1].Sr+(x1)*(1-y1)*field[i1+1][j1].Sr;
              Sl=(1-x1)*(1-y1)*field[i1][j1].Sl+(x1)*(y1)*field[i1+1][j1+1].Sl+(1-x1)*(y1)*field[i1][j1+1].Sl+(x1)*(1-y1)*field[i1+1][j1].Sl;
-=======
              i1=(int)(i+x+0.5);
              j1=(int)(j+y+0.5);
              x1=x+0.5-((int)(x+0.5));
              y1=y+0.5-((int)(y+0.5));
 //             x1=x+i-i1;  y1=y+j-j1;
->>>>>>> dev
 
              E1=(1-x)*(1-y)*field[i][j].E1+x*y*field[i+1][j+1].E1+x*(1-y)*field[i+1][j].E1+(1-x)*y*field[i][j+1].E1;
              B1=(1-x)*(1-y)*field[i][j].B1+x*y*field[i+1][j+1].B1+x*(1-y)*field[i+1][j].B1+(1-x)*y*field[i][j+1].B1;
