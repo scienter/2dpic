@@ -107,6 +107,8 @@ void updateCurrent2D_DSX_3rd(Domain *D)
               yr=maximum(j1*1.0,j2*1.0);
 
             //calculate old point
+            i1=(int)(0.5*(xold+xr));
+            j1=(int)(0.5*(yold+yr));
             x=(xold+xr)*0.5-i1;
             y=(yold+yr)*0.5-j1;
             Fx1=(xr-xold)*0.5*(1-x)*(1-x);
@@ -134,9 +136,9 @@ void updateCurrent2D_DSX_3rd(Domain *D)
             field[i1+1][j1+1].J1+=Fx3*Wy3*coeff[s];
             field[i1+1][j1+2].J1+=Fx3*Wy4*coeff[s];
 
-            Fy1=(yr-yold)*0.5*(1-y)*(1-y);
-            Fy2=(yr-yold)*(0.75-(0.5-y)*(0.5-y));
-            Fy3=(yr-yold)*0.5*y*y;
+            Fy1=(yr-yold)*0.5*(1-y)*(1-y)*dy*inverDt;
+            Fy2=(yr-yold)*(0.75-(0.5-y)*(0.5-y))*dy*inverDt;
+            Fy3=(yr-yold)*0.5*y*y*dy*inverDt;
             x1=1+x;
             x2=x;
             x3=1-x;
@@ -160,6 +162,8 @@ void updateCurrent2D_DSX_3rd(Domain *D)
             field[i1+2][j1+1].J2+=Fy3*Wx4*coeff[s];
 
             //calculate new point
+            i2=(int)(0.5*(xnew+xr));
+            j2=(int)(0.5*(ynew+yr));
             x=(xnew+xr)*0.5-i2;
             y=(ynew+yr)*0.5-j2;
             Fx1=(xnew-xr)*0.5*(1-x)*(1-x);
@@ -187,9 +191,9 @@ void updateCurrent2D_DSX_3rd(Domain *D)
             field[i2+1][j2+1].J1+=Fx3*Wy3*coeff[s];
             field[i2+1][j2+2].J1+=Fx3*Wy4*coeff[s];
 
-            Fy1=(ynew-yr)*0.5*(1-y)*(1-y);
-            Fy2=(ynew-yr)*(0.75-(0.5-y)*(0.5-y));
-            Fy3=(ynew-yr)*0.5*y*y;
+            Fy1=(ynew-yr)*0.5*(1-y)*(1-y)*dy*inverDt;
+            Fy2=(ynew-yr)*(0.75-(0.5-y)*(0.5-y))*dy*inverDt;
+            Fy3=(ynew-yr)*0.5*y*y*dy*inverDt;
             x1=1+x;
             x2=x;
             x3=1-x;

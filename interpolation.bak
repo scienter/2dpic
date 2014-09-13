@@ -1,15 +1,102 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "mesh.h"
 #include "mpi.h"
 
-void interpolation2D_1st(Domain *D)
+void interpolation2D_2nd(Domain *D,External *Ext)  //bicubic
 {
-   int i,j,istart,iend,jstart,jend,s,cnt;
-   float E1,Pr,Pl,B1,Sr,Sl,x,y;
-   float Pr_ij, Pr_ipjp, Pr_ipj, Pr_ijp;
-   float Pl_ij, Pl_ipjp, Pl_ipj, Pl_ijp;
-   float Sr_ij, Sr_ipjp, Sr_ipj, Sr_ijp;
-   float Sl_ij, Sl_ipjp, Sl_ipj, Sl_ijp;
+   int i,j,ii,jj,istart,iend,jstart,jend,s,cnt;
+   float x,y,x1,x2,x3,x4,y1,y2,y3,y4,Pr,Pl,Sr,Sl,E1,B1;
+   float Wx1,Wx2,Wx3,Wx4,Wy1,Wy2,Wy3,Wy4;
+   float extPr,extPl,extSr,extSl,extE1,extB1;
+   ptclList *p;
+   int myrank, nprocs;    
+   double bicubic();
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+   istart=D->istart;
+   iend=D->iend;
+   jstart=D->jstart;
+   jend=D->jend;
+
+   Particle **particle;
+   particle=D->particle;
+
+   extE1=Ext->E1;
+   extB1=Ext->B1;
+   extPr=Ext->Pr;
+   extPl=Ext->Pl;
+   extSr=Ext->Sr;
+   extSl=Ext->Sl;
+ 
+   if(D->fieldType==1)
+   {   
+     FieldDSX **field;
+     field=D->fieldDSX;
+
+     for(i=istart; i<iend; i++)
+       for(j=jstart; j<jend; j++)
+       {
+         for(s=0; s<D->nSpecies; s++)
+         {
+           p=particle[i][j].head[s]->pt;
+           while(p)
+           {
+             x=p->x;  y=p->y;
+             Wx1=0.5*(1-x)*(1-x);
+             Wx2=0.75-(0.5-x)*(0.5-x);
+             Wx3=0.5*x*x;
+             Wy1=0.5*(1-y)*(1-y);
+             Wy2=0.75-(0.5-y)*(0.5-y);
+             Wy3=0.5*y*y;
+            
+             Pr=Wx1*Wy1*field[i-1][j-1].Pr+Wx2*Wy1*field[i][j-1].Pr+Wx3*Wy1*field[i+1][j-1].Pr
+               +Wx1*Wy2*field[i-1][j].Pr+Wx2*Wy2*field[i][j].Pr+Wx3*Wy2*field[i+1][j].Pr
+               +Wx1*Wy3*field[i-1][j+1].Pr+Wx2*Wy3*field[i][j+1].Pr+Wx3*Wy3*field[i+1][j+1].Pr;
+             Pl=Wx1*Wy1*field[i-1][j-1].Pl+Wx2*Wy1*field[i][j-1].Pl+Wx3*Wy1*field[i+1][j-1].Pl
+               +Wx1*Wy2*field[i-1][j].Pl+Wx2*Wy2*field[i][j].Pl+Wx3*Wy2*field[i+1][j].Pl
+               +Wx1*Wy3*field[i-1][j+1].Pl+Wx2*Wy3*field[i][j+1].Pl+Wx3*Wy3*field[i+1][j+1].Pl;
+             Sr=Wx1*Wy1*field[i-1][j-1].Sr+Wx2*Wy1*field[i][j-1].Sr+Wx3*Wy1*field[i+1][j-1].Sr
+               +Wx1*Wy2*field[i-1][j].Sr+Wx2*Wy2*field[i][j].Sr+Wx3*Wy2*field[i+1][j].Sr
+               +Wx1*Wy3*field[i-1][j+1].Sr+Wx2*Wy3*field[i][j+1].Sr+Wx3*Wy3*field[i+1][j+1].Sr;
+             Sl=Wx1*Wy1*field[i-1][j-1].Sl+Wx2*Wy1*field[i][j-1].Sl+Wx3*Wy1*field[i+1][j-1].Sl
+               +Wx1*Wy2*field[i-1][j].Sl+Wx2*Wy2*field[i][j].Sl+Wx3*Wy2*field[i+1][j].Sl
+               +Wx1*Wy3*field[i-1][j+1].Sl+Wx2*Wy3*field[i][j+1].Sl+Wx3*Wy3*field[i+1][j+1].Sl;
+
+             ii=(int)(i+x+0.5);
+             jj=(int)(j+y+0.5);
+             x=i+x-ii;
+             y=j+y-jj;
+             Wx1=0.5*(0.5-x)*(0.5-x);
+             Wx2=0.75-x*x;
+             Wx3=0.5*(x+0.5)*(x+0.5);
+             Wy1=0.5*(0.5-y)*(0.5-y);
+             Wy2=0.75-y*y;
+             Wy3=0.5*(y+0.5)*(y+0.5);
+             E1=Wx1*Wy1*field[ii-1][jj-1].E1+Wx2*Wy1*field[ii][jj-1].E1+Wx3*Wy1*field[ii+1][jj-1].E1
+               +Wx1*Wy2*field[ii-1][jj].E1+Wx2*Wy2*field[ii][jj].E1+Wx3*Wy2*field[ii+1][jj].E1
+               +Wx1*Wy3*field[ii-1][jj+1].E1+Wx2*Wy3*field[ii][jj+1].E1+Wx3*Wy3*field[ii+1][jj+1].E1;
+
+             B1=Wx1*Wy1*field[ii-1][jj-1].B1+Wx2*Wy1*field[ii][jj-1].B1+Wx3*Wy1*field[ii+1][jj-1].B1
+               +Wx1*Wy2*field[ii-1][jj].B1+Wx2*Wy2*field[ii][jj].B1+Wx3*Wy2*field[ii+1][jj].B1
+               +Wx1*Wy3*field[ii-1][jj+1].B1+Wx2*Wy3*field[ii][jj+1].B1+Wx3*Wy3*field[ii+1][jj+1].B1;
+
+             p->E1=E1+extE1; p->Pr=Pr+extPr; p->Pl=Pl+extPl;
+             p->B1=B1+extB1; p->Sr=Sr+extSr; p->Sl=Sl+extSl;
+         
+             p=p->next;
+           }
+         }		//for(s)        
+       }		   //for(i,j)
+   }           //End of fieldType=1
+
+}
+
+void interpolation2D_1st(Domain *D,External *Ext)
+{
+   int i,j,i1,j1,istart,iend,jstart,jend,s,cnt;
+   float E1,Pr,Pl,B1,Sr,Sl,extE1,extB1,extPr,extPl,extSr,extSl,x,y,x1,y1;
    ptclList *p;
    int myrank, nprocs;    
 
@@ -23,6 +110,12 @@ void interpolation2D_1st(Domain *D)
    Particle **particle;
    particle=D->particle;
 
+   extE1=Ext->E1;
+   extB1=Ext->B1;
+   extPr=Ext->Pr;
+   extPl=Ext->Pl;
+   extSr=Ext->Sr;
+   extSl=Ext->Sl;
    if(D->fieldType==1)
    {   
      FieldDSX **field;
@@ -31,23 +124,6 @@ void interpolation2D_1st(Domain *D)
      for(i=istart; i<iend; i++)
        for(j=jstart; j<jend; j++)
        {
-         Pr_ij=0.25*(field[i][j].Pr+field[i-1][j].Pr+field[i-1][j-1].Pr+field[i][j-1].Pr);	//i,j
-         Pr_ipjp=0.25*(field[i+1][j+1].Pr+field[i][j+1].Pr+field[i][j].Pr+field[i+1][j].Pr);		//i+1,j+1
-         Pr_ipj=0.25*(field[i+1][j].Pr+field[i][j].Pr+field[i][j-1].Pr+field[i+1][j-1].Pr);	//i+1,j
-         Pr_ijp=0.25*(field[i][j+1].Pr+field[i-1][j+1].Pr+field[i-1][j].Pr+field[i][j].Pr);		//i,j+1
-         Pl_ij=0.25*(field[i][j].Pl+field[i-1][j].Pl+field[i-1][j-1].Pl+field[i][j-1].Pl);	//i,j
-         Pl_ipjp=0.25*(field[i+1][j+1].Pl+field[i][j+1].Pl+field[i][j].Pl+field[i+1][j].Pl);		//i+1,j+1
-         Pl_ipj=0.25*(field[i+1][j].Pl+field[i][j].Pl+field[i][j-1].Pl+field[i+1][j-1].Pl);	//i+1,j
-         Pl_ijp=0.25*(field[i][j+1].Pl+field[i-1][j+1].Pl+field[i-1][j].Pl+field[i][j].Pl);		//i,j+1
-         Sr_ij=0.25*(field[i][j].Sr+field[i-1][j].Sr+field[i-1][j-1].Sr+field[i][j-1].Sr);	//i,j
-         Sr_ipjp=0.25*(field[i+1][j+1].Sr+field[i][j+1].Sr+field[i][j].Sr+field[i+1][j].Sr);		//i+1,j+1
-         Sr_ipj=0.25*(field[i+1][j].Sr+field[i][j].Sr+field[i][j-1].Sr+field[i+1][j-1].Sr);	//i+1,j
-         Sr_ijp=0.25*(field[i][j+1].Sr+field[i-1][j+1].Sr+field[i-1][j].Sr+field[i][j].Sr);		//i,j+1
-         Sl_ij=0.25*(field[i][j].Sl+field[i-1][j].Sl+field[i-1][j-1].Sl+field[i][j-1].Sl);	//i,j
-         Sl_ipjp=0.25*(field[i+1][j+1].Sl+field[i][j+1].Sl+field[i][j].Sl+field[i+1][j].Sl);		//i+1,j+1
-         Sl_ipj=0.25*(field[i+1][j].Sl+field[i][j].Sl+field[i][j-1].Sl+field[i+1][j-1].Sl);	//i+1,j
-         Sl_ijp=0.25*(field[i][j+1].Sl+field[i-1][j+1].Sl+field[i-1][j].Sl+field[i][j].Sl);		//i,j+1
-
          for(s=0; s<D->nSpecies; s++)
          {
            cnt=0;
@@ -55,16 +131,21 @@ void interpolation2D_1st(Domain *D)
            while(p)
            {
              x=p->x;  y=p->y;
+             i1=(int)(i+x+0.5);
+             j1=(int)(j+y+0.5);
+             x1=x+0.5-((int)(x+0.5));
+             y1=y+0.5-((int)(y+0.5));
+//             x1=x+i-i1;  y1=y+j-j1;
 
              E1=(1-x)*(1-y)*field[i][j].E1+x*y*field[i+1][j+1].E1+x*(1-y)*field[i+1][j].E1+(1-x)*y*field[i][j+1].E1;
              B1=(1-x)*(1-y)*field[i][j].B1+x*y*field[i+1][j+1].B1+x*(1-y)*field[i+1][j].B1+(1-x)*y*field[i][j+1].B1;
-             Pr=(1-x)*(1-y)*Pr_ij+x*y*Pr_ipjp+x*(1-y)*Pr_ipj+(1-x)*y*Pr_ijp;
-             Pl=(1-x)*(1-y)*Pl_ij+x*y*Pl_ipjp+x*(1-y)*Pl_ipj+(1-x)*y*Pl_ijp;
-             Sr=(1-x)*(1-y)*Sr_ij+x*y*Sr_ipjp+x*(1-y)*Sr_ipj+(1-x)*y*Sr_ijp;
-             Sl=(1-x)*(1-y)*Sl_ij+x*y*Sl_ipjp+x*(1-y)*Sl_ipj+(1-x)*y*Sl_ijp;
+             Pr=(0.5-x1)*(0.5-y1)*field[i1-1][j1-1].Pr+(0.5+x1)*(0.5+y1)*field[i1][j1].Pr+(0.5-x1)*(0.5+y1)*field[i1-1][j1].Pr+(0.5+x1)*(0.5-y1)*field[i1][j1-1].Pr;
+             Pl=(0.5-x1)*(0.5-y1)*field[i1-1][j1-1].Pl+(0.5+x1)*(0.5+y1)*field[i1][j1].Pl+(0.5-x1)*(0.5+y1)*field[i1-1][j1].Pl+(0.5+x1)*(0.5-y1)*field[i1][j1-1].Pl;
+             Sr=(0.5-x1)*(0.5-y1)*field[i1-1][j1-1].Sr+(0.5+x1)*(0.5+y1)*field[i1][j1].Sr+(0.5-x1)*(0.5+y1)*field[i1-1][j1].Sr+(0.5+x1)*(0.5-y1)*field[i1][j1-1].Sr;
+             Sl=(0.5-x1)*(0.5-y1)*field[i1-1][j1-1].Sl+(0.5+x1)*(0.5+y1)*field[i1][j1].Sl+(0.5-x1)*(0.5+y1)*field[i1-1][j1].Sl+(0.5+x1)*(0.5-y1)*field[i1][j1-1].Sl;
 
-             p->E1=E1; p->Pr=Pr; p->Pl=Pl;
-             p->B1=B1; p->Sr=Sr; p->Sl=Sl;
+             p->E1=E1+extE1; p->Pr=Pr+extPr; p->Pl=Pl+extPl;
+             p->B1=B1+extB1; p->Sr=Sr+extSr; p->Sl=Sl+extSl;
 
              p=p->next;
              cnt++;
@@ -74,3 +155,35 @@ void interpolation2D_1st(Domain *D)
    }           //End of fieldType=1
 
 }
+
+
+double bicubic(double data[], int wt[][16], double x, double y)
+{
+   int m,n,cnt;
+   float coef[4][4] = {0,0,0,0,
+                       0,0,0,0,
+                       0,0,0,0,
+                       0,0,0,0};
+   float cl[16];
+   float xx;
+   double result;
+
+   for(m=0; m<16; m++)
+   {
+     xx=0.0;
+     for(n=0; n<16; n++) xx += wt[m][n]*data[n];
+     cl[m]=xx;
+   }
+
+   cnt=0;
+   for(m=0; m<4; m++)
+     for(n=0; n<4; n++)
+       coef[m][n]=cl[cnt++];
+
+   result=0.0;
+   for(m=3; m>=0; m--)
+     result=x*result + ((coef[m][3]*y+coef[m][2])*y+coef[m][1])*y + coef[m][0];
+   return result;
+
+}
+
