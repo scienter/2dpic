@@ -45,8 +45,6 @@ void updateCurrent2D_DSX_3rd(Domain *D)
     while(LL->next)
     {
        coeff[s]=LL->charge*LL->density/LL->criticalDensity/LL->numberInCell;
-//       coeff[s]=LL->charge*LL->superP/LL->criticalDensity/D->lambda/D->lambda/dx/dy;
-//       charge[s]=LL->charge;
        LL=LL->next;
        s++;
     }
@@ -297,8 +295,6 @@ void updateCurrent2D_DSX_2nd(Domain *D)
     while(LL->next)
     {
        coeff[s]=LL->charge*LL->density/LL->criticalDensity/LL->numberInCell;
-//       coeff[s]=LL->charge*LL->superP/LL->criticalDensity/D->lambda/D->lambda/dx/dy;
-//       charge[s]=LL->charge;
        LL=LL->next;
        s++;
     }
@@ -480,8 +476,6 @@ void updateCurrent2D_DSX_1st(Domain *D)
     while(LL->next)
     {
        coeff[s]=LL->charge*LL->density/LL->criticalDensity/LL->numberInCell;
-//       coeff[s]=LL->charge*LL->superP/LL->criticalDensity/D->lambda/D->lambda/dx/dy;
-//       charge[s]=LL->charge;
        LL=LL->next;
        s++;
     }
