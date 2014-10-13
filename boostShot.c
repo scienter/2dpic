@@ -44,7 +44,6 @@ void boostShot(Domain *D,int iteration)
       for(time=D->saveStart; time<=D->maxStep; time+=D->saveStep)
       {
         i=(int)(time/D->gamma/D->beta/factor-iteration/D->beta-D->minXSub+istart);
-
         if(i>=istart && i<iend)
         {
           sprintf(name,"bField%d_%d_%d",time,i-istart,myrank);

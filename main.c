@@ -137,12 +137,10 @@ int main(int argc, char *argv[])
 
           if(iteration>=D.maxT)   
           {
-//             boostSaveField(&D,labSaveStep);
              iteration=D.maxStep+1;
           }
 
        }
-
 
        //save File      
        if(iteration%D.saveStep==0 && iteration>=D.saveStart)   
@@ -193,7 +191,7 @@ int main(int argc, char *argv[])
 //       else           periodY(&D);
        if(D.fieldType==1)
        {
-         absorpbing(&D);
+//         absorpbing(&D);
          solveField2DC_DSX(&D);
          MPI_TransferF_DSX_YminusC(&D,D.numShareDn);
          MPI_TransferF_DSX_YplusC(&D,D.numShareUp);

@@ -23,8 +23,8 @@ void boostLoadLaser2D(Domain *D,LaserList *L)
    beta=D->beta;
 
    labWaist=L->beamWaist*D->lambda;
-//   zR=L->rayleighLength/gamma;
-   zR=pi/(L->lambda/D->gamma/(1.0+D->beta))*labWaist*labWaist/gamma/D->lambda;
+   zR=L->rayleighLength/gamma;
+//   zR=pi/(L->lambda/D->gamma/(1.0+D->beta))*labWaist*labWaist/gamma/D->lambda;
    w0=labWaist/D->lambda;  
    f=-L->focus/gamma;   
    omega=k=2*pi;
