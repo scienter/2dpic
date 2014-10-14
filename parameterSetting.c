@@ -161,10 +161,18 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    }
 
    //pml
-   if(FindParameters("Domain",1,"pmlCell",input,str)) D->pmlCell=atoi(str);
+   if(FindParameters("Domain",1,"pmlOn",input,str)) D->pmlOn=atoi(str);
    else  {
-      printf("in [Domain], pmlCell=? [ea]\n");
+      printf("in [Domain], pmlOn=? \n");
       fail=1;
+   }
+   if(D->pmlOn==1)
+   {
+     if(FindParameters("Domain",1,"pmlCell",input,str)) D->pmlCell=atoi(str);
+     else  {
+        printf("in [Domain], pmlCell=? [ea]\n");
+        fail=1;
+     }
    }
 
 

@@ -83,6 +83,7 @@ typedef struct _Domain
    struct _Probe **probe;
 
    //PML
+   int pmlOn;
    int pmlCell;   
 }  Domain; 
 

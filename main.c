@@ -191,13 +191,13 @@ int main(int argc, char *argv[])
 //       else           periodY(&D);
        if(D.fieldType==1)
        {
-//         absorpbing(&D);
+         if(D.pmlOn==1)   absorpbing(&D);
          solveField2DC_DSX(&D);
          MPI_TransferF_DSX_YminusC(&D,D.numShareDn);
          MPI_TransferF_DSX_YplusC(&D,D.numShareUp);
-//       if(nTasks==1)  periodY1coreC(&D);   
+//         if()  periodY1coreC(&D);   
 
-         absorpbingC(&D);
+         if(D.pmlOn==1)   absorpbingC(&D);
          solveField2D_DSX(&D);
          MPI_TransferF_DSX_Yminus(&D,D.numShareDn);
          MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
