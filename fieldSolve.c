@@ -26,8 +26,8 @@ void solveField2DC_DSX(Domain *D)
     // PrC,PlC,E1C,SrC,SlC,B1C
     for(j=jstart; j<jend; j++)
     {
-      nowPrC=field[0][j].PrC;
-      nowSrC=field[0][j].SrC;
+      nowPrC=field[istart-1][j].PrC;
+      nowSrC=field[istart-1][j].SrC;
       for(i=istart; i<iend; i++)
       {
          field[i][j].E1C+=0.5*dt/dy*(field[i-1][j].Pr-field[i-1][j].Pl+field[i][j].Pr-field[i][j].Pl-field[i-1][j-1].Pr+field[i-1][j-1].Pl-field[i][j-1].Pr+field[i][j-1].Pl)-0.5*pi*dt*(field[i-1][j].J1Old+field[i-1][j].J1+field[i][j].J1Old+field[i][j].J1);
@@ -68,8 +68,8 @@ void solveField2D_DSX(Domain *D)
     // Pr,Pl,E1,Sr,Sl,B1
     for(j=jstart; j<jend; j++)
     {
-      nowPr=field[0][j].Pr;
-      nowSr=field[0][j].Sr;
+      nowPr=field[istart-1][j].Pr;
+      nowSr=field[istart-1][j].Sr;
       for(i=istart; i<iend; i++)
       {
          field[i][j].E1+=0.5*dt/dy*(field[i-1][j].PrC-field[i-1][j].PlC+field[i][j].PrC-field[i][j].PlC-field[i-1][j-1].PrC+field[i-1][j-1].PlC-field[i][j-1].PrC+field[i][j-1].PlC)-pi*dt*(field[i-1][j].J1+field[i][j].J1);

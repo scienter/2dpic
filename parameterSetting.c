@@ -248,7 +248,7 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    else probeType=0;
    D->probeNum=0;
 
-   if(probeType==1)
+   if(probeType==0)
    {
      if(FindParameters("Probe",1,"probeNum",input,str)) D->probeNum=atoi(str);
      else  {
@@ -278,7 +278,7 @@ void parameterSetting(Domain *D,External *Ext, char *input)
        }
      }  
    }
-   else if(probeType==2)
+   else if(probeType==1)
    {
      if(FindParameters("Probe",1,"minProbeX",input,str)) minProbeX=atof(str);
      else  {

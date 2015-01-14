@@ -25,7 +25,6 @@ void saveProbe(Domain *D,int iteration)
 
     for(n=0; n<D->probeNum; n++)
     {
-      
       if(D->probeX[n]>=D->minXSub && D->probeX[n]<D->maxXSub && 
          D->probeY[n]>=D->minYSub && D->probeY[n]<D->maxYSub)
       {
@@ -195,7 +194,7 @@ void saveField2D(Domain *D,int iteration)
     iend=D->iend;
     jstart=D->jstart;
     jend=D->jend;
-
+printf("fieldType=%d\n",D->fieldType);
     if(D->fieldType==1)
     {
       FieldDSX **field;
