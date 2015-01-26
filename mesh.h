@@ -16,6 +16,7 @@ typedef struct _Domain
    int saveStart;
    int dumpStart;
    int dumpSave;
+   int dumpInter; 	//if dumpData doesn't match with input file.
    int fieldSave;
    int particleSave;
    int rhoSave;

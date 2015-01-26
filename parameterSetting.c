@@ -87,6 +87,8 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    }
    if(FindParameters("Domain",1,"dumpStart",input,name)) D->dumpStart=atoi(name);
    else  D->dumpStart=D->saveStart;
+   if(FindParameters("Domain",1,"dumpInter",input,name)) D->dumpInter=atoi(name);
+   else  D->dumpInter=0;
    if(FindParameters("Domain",1,"fieldSave",input,name)) D->fieldSave=atoi(name);
    else  D->fieldSave=1;
    if(FindParameters("Domain",1,"particleSave",input,name)) D->particleSave=atoi(name);

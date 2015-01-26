@@ -102,10 +102,16 @@ int main(int argc, char *argv[])
     }
 
     //load plasma or load dump file
-    if(argc >= 3)
+    if(argc >= 3 && D.dumpInter==0)
     {   
       iteration = atoi(argv[2]);
       restoreData2D(&D,iteration);
+      t=D.dt*iteration; 
+    }
+    else if(argc >= 3 && D.dumpInter==1)
+    {   
+      iteration = atoi(argv[2]);
+      restoreDataInter2D(&D,iteration);
       t=D.dt*iteration; 
     }
     else 
