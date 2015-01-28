@@ -31,6 +31,10 @@ void rearrangeParticles2D(Domain *D)
             p=particle[i][j].head[s]->pt;
             while(p)
             {
+              if(cnt==1)
+                prev=p;
+              deleteFlag=0;
+              
               x=p->x;   y=p->y; 
               if(x>=1.0)  {
                 intX=(int)x;
@@ -44,42 +48,34 @@ void rearrangeParticles2D(Domain *D)
               } 
               else   intX=0;
               if(y>=1.0)  {
-                intY=(int)y;
-                y-=intY;
-                deleteFlag=1;
+                 intY=(int)y;
+                 y-=intY;
+                 deleteFlag=1;
               }
               else if(y<0) {
                 intY=(int)(y-1);
                 y-=intY;
                 deleteFlag=1;
               } 
-              else   intY=0;            
+              else   intY=0;       
               if(deleteFlag==1)
               {
-                New = (ptclList *)malloc(sizeof(ptclList)); 
-                New->next = particle[i+intX][j+intY].head[s]->pt;
-                particle[i+intX][j+intY].head[s]->pt = New;
-                New->x=x;    New->oldX=p->oldX;
-                New->y=y;    New->oldY=p->oldY;
-                New->p1=p->p1;  New->p2=p->p2;  New->p3=p->p3;
-                New->index=p->index;
-  
                 if(cnt==1)
                 {
-                  tmp=p->next;
-                  particle[i][j].head[s]->pt=tmp; 
-                  p->next=NULL;
-                  free(p);
-                  p=particle[i][j].head[s]->pt; 
+                  particle[i][j].head[s]->pt = p->next;
+                  p->x=x;   p->y=y;     
+                  p->next = particle[i+intX][j+intY].head[s]->pt;
+                  particle[i+intX][j+intY].head[s]->pt = p;
+                  p=particle[i][j].head[s]->pt;
                   cnt=1;
                 }
                 else
                 {
-                  prev->next=p->next;
-                  p->next=NULL;
-                  free(p);
-                  p=prev->next; 
-                  cnt++;
+                  prev->next = p->next;
+                  p->x=x;   p->y=y;     
+                  p->next = particle[i+intX][j+intY].head[s]->pt;
+                  particle[i+intX][j+intY].head[s]->pt = p;
+                  p=prev->next;
                 }
               }		//End of if(deleteFlag==1)
               else
@@ -87,11 +83,9 @@ void rearrangeParticles2D(Domain *D)
                 prev=p;
                 p=p->next;
                 cnt++;
-              }
-
-              deleteFlag=0;
-            }
-          }		//End of for(s)
-    }          //End of fieldType=1
+              }              
+            }	//End if while(p)
+          }			//End of for(s)
+    }          	//End of fieldType=1
 }
 
