@@ -6,7 +6,7 @@
 
 void boundary(Domain *D,External *Ext)
 {
-     int i,j,s,rank,remain,tmp,sub,nxSub,nySub,numdataUp,numdataBt,numberData;
+     int i,j,s,rank,remain,tmp,sub,nxSub,nySub,numdataUp,numdataBt,numberData,minY;
      float min,max;
      int myrank, nTasks;
      MPI_Status status;
@@ -36,10 +36,11 @@ void boundary(Domain *D,External *Ext)
            rank++;
         }
         D->nySub=D->maxYSub=D->ny;
-        D->minYSub=0;
+//        D->minYSub=;
      }
      else if(D->divDirection==2)
      {
+        minY=D->minYSub;
         D->nySub=D->ny/nTasks;
         sub=D->nySub;
         remain=D->ny%nTasks;
@@ -53,8 +54,8 @@ void boundary(Domain *D,External *Ext)
            max=min+tmp;
            if(myrank==rank)
            {
-              D->minYSub=min;
-              D->maxYSub=max;
+              D->minYSub=min+minY;
+              D->maxYSub=max+minY;
               D->nySub=tmp;
            }
            rank++;

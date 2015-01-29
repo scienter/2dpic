@@ -112,7 +112,9 @@ int main(int argc, char *argv[])
     {   
       iteration = atoi(argv[2]);
       restoreDataInter2D(&D,iteration);
-      t=D.dt*iteration; 
+      t=D.dt*iteration;
+      iteration++; 
+      t=D.dt*iteration;
     }
     else 
     {
@@ -180,7 +182,6 @@ int main(int argc, char *argv[])
               printf("probe%d is made.\n",iteration);              
           }
        }
-
 
        //load laser
        if(D.boostOn==0)	{
@@ -279,7 +280,7 @@ int main(int argc, char *argv[])
     fclose(out);
 
     clean2D(&D);
-    
+  
     MPI_Finalize();
 
     return 0;

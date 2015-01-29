@@ -29,6 +29,8 @@ typedef struct _Domain
    int iend;
    int jstart;
    int jend;
+   float minX;
+   float minY;
    int minXSub;        //Each core has start mesh point in total domain
    int maxXSub;
    int minYSub;        //Each core has start mesh point in total domain

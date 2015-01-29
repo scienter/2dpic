@@ -260,7 +260,7 @@ void restoreDataInter2D(Domain *D, int iteration)
 {
    FILE *in;
    char name[100];
-   int i,j,ii,jj,istart,iend,jstart,jend,n,s,cntParticle,cntField;
+   int i,j,ii,jj,istart,iend,jstart,jend,n,s,cntParticle,cntField,cnt;
    int minXSub,maxXSub,minYSub,maxYSub,maxStep,nxSub,nySub;
    float tmp,dx,dy,lambda,xx,yy,x,y,p1,p2,p3,index,numberInCell;
    double tmp1;
@@ -296,14 +296,16 @@ void restoreDataInter2D(Domain *D, int iteration)
    LL=D->loadList;
    while(LL->next)
    {
-     fread(&(LL->numberInCell),sizeof(float),1,in);
-     LL->numberInCell=numberInCell*D->dx*D->dy/dx/dy;
+     fread(&(numberInCell),sizeof(float),1,in);
+//     LL->numberInCell=numberInCell*D->dx*D->lambda*D->dy*D->lambda/dx/lambda/dy/lambda;
+     LL->numberInCell=numberInCell;
      LL=LL->next;
    }
 
    // restore informations of particles inside the domain
    fread(&cntParticle,sizeof(int),1,in);
 
+   cnt=0;
    for(n=0; n<cntParticle; n++)  
    { 
      fread(&(s),sizeof(int),1,in);
@@ -315,24 +317,30 @@ void restoreDataInter2D(Domain *D, int iteration)
      yy=(j-jstart+minYSub+yy)*dy*lambda;
      x=xx/D->lambda/D->dx-(int)(xx/D->lambda/D->dx);
      y=yy/D->lambda/D->dy-(int)(yy/D->lambda/D->dy);
-printf("xx=%g, x=%g, yy=%g, y=%g\n",xx,x,yy,y);
      i=((int)(xx/D->lambda/D->dx))-D->minXSub+D->istart;
      j=((int)(yy/D->lambda/D->dy))-D->minYSub+D->jstart;
+//if(i<D->istart || i>D->iend || j<D->jstart-1 || j>D->jend)
+//printf("i=%d, j=%d\n",i,j);
      fread(&(p1),sizeof(float),1,in);   
      fread(&(p2),sizeof(float),1,in);   
      fread(&(p3),sizeof(float),1,in);   
      fread(&(index),sizeof(float),1,in); 
-     p = (ptclList *)malloc(sizeof(ptclList)); 
-     p->next = particle[i][j].head[s]->pt;
-     particle[i][j].head[s]->pt = p;
-     p->x=x;
-     p->y=y;
-     p->p1=p1;
-     p->p2=p2;
-     p->p3=p3;
-     p->index=index;
+     if(i>=D->istart && i<D->iend && j>=D->jstart && j<D->jend)
+     {
+       p = (ptclList *)malloc(sizeof(ptclList)); 
+       p->next = particle[i][j].head[s]->pt;
+       particle[i][j].head[s]->pt = p;
+       p->x=x;
+       p->y=y;
+       p->p1=p1;
+       p->p2=p2;
+       p->p3=p3;
+       p->index=index;
+     }
+     cnt++;
+//printf("cnt=%d, cntParticle=%d\n",cnt,cntParticle);
    }
-/*
+
    mesh=(FieldDSX **)malloc((nxSub+5)*sizeof(FieldDSX *));
    for(i=0; i<nxSub+5; i++)
      mesh[i]=(FieldDSX *)malloc((nySub+5)*sizeof(FieldDSX ));
@@ -366,7 +374,6 @@ printf("xx=%g, x=%g, yy=%g, y=%g\n",xx,x,yy,y);
        fread(&(mesh[i][j].J2Old),sizeof(float),1,in);
        fread(&(mesh[i][j].J3Old),sizeof(float),1,in);
      }
-
      for(i=D->istart; i<D->iend; i++)
        for(j=D->jstart; j<D->jend; j++)
        {
@@ -376,6 +383,7 @@ printf("xx=%g, x=%g, yy=%g, y=%g\n",xx,x,yy,y);
          jj=((int)(yy/lambda/dy))-minYSub+jstart;	//data's index
          if(ii>istart && ii<iend && jj>jstart && jj<jend)
          { 
+//printf("ii=%d, jj=%d \n",ii,jj);
            x=xx/lambda/dx-((int)(xx/lambda/dx));	//x weight
            y=yy/lambda/dy-((int)(yy/lambda/dy));	//y weight
            field[i][j].E1=(1-x)*(1-y)*mesh[ii][jj].E1
@@ -452,8 +460,9 @@ printf("xx=%g, x=%g, yy=%g, y=%g\n",xx,x,yy,y);
                             +    x*    y*mesh[ii+1][jj+1].J3Old;
          }		//End of (if ii and jj is in the range)
        }			//End of i and j
+printf("done\n");
    }       //End of fieldType=1
-*/
+
 
    //restore Probe data
 //   if(D->probeNum>0)

@@ -22,9 +22,11 @@ void boostLoadLaser2D(Domain *D,LaserList *L)
    gamma=D->gamma;
    beta=D->beta;
 
-   zR=L->rayleighLength;
-   w0=L->beamWaist;  
-   f=L->focus/gamma;   
+   labWaist=L->beamWaist*D->lambda;
+   zR=L->rayleighLength/gamma;
+//   zR=pi/(L->lambda/D->gamma/(1.0+D->beta))*labWaist*labWaist/gamma/D->lambda;
+   w0=labWaist/D->lambda;  
+   f=-L->focus/gamma;   
    omega=k=2*pi;
    x0=-2*rU;
    unitCompen=gamma*gamma*(1.0-beta*beta);
@@ -41,7 +43,7 @@ void boostLoadLaser2D(Domain *D,LaserList *L)
          {
            x=(i+D->minXSub-2)*D->dx;
            y=(j-2+D->minYSub-jC)*D->dy;
-           z=(x-f);          
+           z=(f+x+x0);          
            w=w0*sqrt(1.0+z*z/zR/zR);
            if(x>=2*x0)
            {
@@ -103,7 +105,7 @@ void boostLoadLaser2D(Domain *D,LaserList *L)
 
 void loadLaser2D(Domain *D,LaserList *L,double t)
 {
-   float rU,rD,longitudinal,t0,flat;
+   float rU,rD,longitudinal,t0,flat,minY;
    float zR,w0,z,w,phi,omega,k,y,pphi,amp;
    int istart,iend,jstart,jend;
    int positionX,positionY,rank,j,jC,laserOK=0;    
@@ -116,13 +118,13 @@ void loadLaser2D(Domain *D,LaserList *L,double t)
    iend=D->iend;
    jstart=D->jstart;
    jend=D->jend;
-
+   minY=D->minY/D->dy/D->lambda;
 
    rU=L->rU*D->divisionLambda*D->dt;
    rD=L->rD*D->divisionLambda*D->dt;
    flat=L->flat*D->divisionLambda*D->dt*L->lambda/D->lambda;
 
-   jC=(int)(D->ny*0.5);	//center position
+   jC=(int)(D->ny*0.5+minY);	//center position
 
    t0=2*rU;
    zR=L->rayleighLength;

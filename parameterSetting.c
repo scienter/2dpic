@@ -98,8 +98,8 @@ void parameterSetting(Domain *D,External *Ext, char *input)
 
    if(FindParameters("Domain",1,"minX",input,str)) 
    {
-      minX=atof(str);
-      minX*=D->gamma*(1+D->beta);
+      D->minX=atof(str);
+      D->minX*=D->gamma*(1+D->beta);
    }
    else  {
       printf("minX value must be defined.\n");
@@ -115,7 +115,7 @@ void parameterSetting(Domain *D,External *Ext, char *input)
       fail=1;
    }
    if(FindParameters("Domain",1,"minY",input,str)) 
-      minY=atof(str);
+      D->minY=atof(str);
    else  {
       printf("minY value must be defined.\n");
       fail=1;
@@ -215,12 +215,14 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    D->dx=1.0/D->divisionLambda;
    D->dt=D->dx;   
    D->dy=D->dx*dyoverdx/D->gamma/(1+D->beta);
-   if(D->dx>=D->dy) 
+   if(D->dx*1.1>D->dy) 
    {
-     D->dy=D->dx/D->gamma/(1+D->beta)*dyoverdx;
-     D->dx=D->dy*0.5;
-     D->divisionLambda=1.0/D->dx;
-     D->dt=D->dx;   
+     while(D->dx*1.1>D->dy)
+     {
+       D->divisionLambda += 1;
+       D->dx=1.0/D->divisionLambda;
+       D->dt=D->dx;   
+     }
    }
    printf("gamma=%g, dx=%g, dy=%g, divisionLambda=%g\n",D->gamma,D->dx,D->dy,D->divisionLambda);
 /*
@@ -231,8 +233,8 @@ void parameterSetting(Domain *D,External *Ext, char *input)
       fail=1;
    }   
 */
-   D->nx=((int)((maxX-minX)/D->lambda/D->dx));
-   D->ny=((int)((maxY-minY)/D->lambda/D->dy));
+   D->nx=((int)((maxX-D->minX)/D->lambda/D->dx));
+   D->ny=((int)((maxY-D->minY)/D->lambda/D->dy));
    D->omega=2*pi*velocityC/D->lambda;
    if(D->boostOn==1)   {
       D->minXSub=-D->nx;
@@ -240,7 +242,7 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    }
    else   {
       D->minXSub=0;
-      D->minYSub=0;
+      D->minYSub=(int)(D->minY/D->lambda/D->dy);
    }
 
    //Probe parameter
@@ -444,7 +446,7 @@ int findLaserParameters(int rank, LaserList *L,Domain *D,char *input)
      L->omega=2*pi*velocityC/L->lambda;
      L->loadPointX=((int)(positionX/D->lambda/D->dx));   
      L->loadPointY=((int)(positionY/D->lambda/D->dy));   
-     L->rayleighLength=pi/L->lambda*L->beamWaist*L->beamWaist/D->lambda;
+     L->rayleighLength=pi/(L->lambda/D->gamma/(1.0+D->beta))*L->beamWaist*L->beamWaist/D->lambda;
      L->beamWaist=L->beamWaist/D->lambda;
      L->focus=L->focus/D->lambda;
      if(fail==1)

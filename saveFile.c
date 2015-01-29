@@ -194,7 +194,7 @@ void saveField2D(Domain *D,int iteration)
     iend=D->iend;
     jstart=D->jstart;
     jend=D->jend;
-printf("fieldType=%d\n",D->fieldType);
+
     if(D->fieldType==1)
     {
       FieldDSX **field;
