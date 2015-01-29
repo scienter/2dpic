@@ -215,14 +215,12 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    D->dx=1.0/D->divisionLambda;
    D->dt=D->dx;   
    D->dy=D->dx*dyoverdx/D->gamma/(1+D->beta);
-   if(D->dx*1.1>D->dy) 
+   if(D->dx>=D->dy) 
    {
-     while(D->dx*1.1>D->dy)
-     {
-       D->divisionLambda += 1;
-       D->dx=1.0/D->divisionLambda;
-       D->dt=D->dx;   
-     }
+     D->dy=D->dx/D->gamma/(1+D->beta)*dyoverdx;
+     D->dx=D->dy*0.5;
+     D->divisionLambda=1.0/D->dx;
+     D->dt=D->dx;   
    }
    printf("gamma=%g, dx=%g, dy=%g, divisionLambda=%g\n",D->gamma,D->dx,D->dy,D->divisionLambda);
 /*
@@ -446,7 +444,7 @@ int findLaserParameters(int rank, LaserList *L,Domain *D,char *input)
      L->omega=2*pi*velocityC/L->lambda;
      L->loadPointX=((int)(positionX/D->lambda/D->dx));   
      L->loadPointY=((int)(positionY/D->lambda/D->dy));   
-     L->rayleighLength=pi/(L->lambda/D->gamma/(1.0+D->beta))*L->beamWaist*L->beamWaist/D->lambda;
+     L->rayleighLength=pi/L->lambda*L->beamWaist*L->beamWaist/D->lambda;
      L->beamWaist=L->beamWaist/D->lambda;
      L->focus=L->focus/D->lambda;
      if(fail==1)
