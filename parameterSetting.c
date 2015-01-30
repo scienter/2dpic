@@ -446,7 +446,7 @@ int findLaserParameters(int rank, LaserList *L,Domain *D,char *input)
      L->omega=2*pi*velocityC/L->lambda;
      L->loadPointX=((int)(positionX/D->lambda/D->dx));   
      L->loadPointY=((int)(positionY/D->lambda/D->dy));   
-     L->rayleighLength=pi/(L->lambda/D->gamma/(1.0+D->beta))*L->beamWaist*L->beamWaist/D->lambda;
+     L->rayleighLength=pi/L->lambda/D->gamma/(1+D->beta)*L->beamWaist*L->beamWaist/D->lambda;
      L->beamWaist=L->beamWaist/D->lambda;
      L->focus=L->focus/D->lambda;
      if(fail==1)

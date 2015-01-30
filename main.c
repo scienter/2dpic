@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     if(D.boostOn==1) {
       L=D.laserList;
       while(L->next)  {
-        boostLoadLaser2D(&D,L);  
+        boostLoadLaser2D(&D,L,t);  
         L=L->next;
       }
       MPI_TransferF_DSX_Yminus(&D,D.numShareDn);
@@ -143,10 +143,10 @@ int main(int argc, char *argv[])
        {
           boostShot(&D,iteration);    
 
-          if(iteration>=D.maxT)   
-          {
-             iteration=D.maxStep+1;
-          }
+//          if(iteration>=D.maxT)   
+//          {
+//             iteration=D.maxStep+1;
+//          }
 
        }
 

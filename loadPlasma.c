@@ -366,10 +366,10 @@ void loadMovingPlasma2D(Domain *D)
            v1=maxwellianVelocity(LL->temperature)/velocityC;
            v2=maxwellianVelocity(LL->temperature)/velocityC;
            v3=maxwellianVelocity(LL->temperature)/velocityC;
-           gamma=1.0/sqrt(1.0-(v1*v1+v2*v2+v3*v3));
-           p->p1=-D->gamma*D->beta+gamma*v1;
-           p->p2=gamma*v2;
-           p->p3=gamma*v3;
+           gamma=sqrt(1.0+(v1*v1+v2*v2+v3*v3));
+           p->p1=-D->gamma*D->beta+v1;
+           p->p2=v2;
+           p->p3=v3;
 
            p=p->next;
          } 
@@ -553,10 +553,10 @@ void loadPlasma2D(Domain *D)
            v1=maxwellianVelocity(LL->temperature)/velocityC;
            v2=maxwellianVelocity(LL->temperature)/velocityC;
            v3=maxwellianVelocity(LL->temperature)/velocityC;
-           gamma=1.0/sqrt(1.0-(v1*v1+v2*v2+v3*v3));
-           p->p1=-D->gamma*D->beta+gamma*v1;
-           p->p2=gamma*v2;
-           p->p3=gamma*v3;
+//           gamma=1.0/sqrt(1.0-(v1*v1+v2*v2+v3*v3));
+           p->p1=-D->gamma*D->beta+v1;
+           p->p2=v2;
+           p->p3=v3;
 
            p=p->next;
          } 
