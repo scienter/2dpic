@@ -15,7 +15,7 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    float minX,maxX,minY,maxY,positionX,positionY,factor,pMinX,pMaxX,pPosition;
    float normalB,normalE,E1,E2,E3,B1,B2,B3,dyoverdx;
    char str[100],name[100];
-   int rank,minT,maxT,boostSaveStep,boostSaveStart,boostSaveEnd,tmpInt,fail=0,cnt;
+   int rank,minT,maxT,tmpInt,fail=0,cnt;
    int i,j,n,numProbeX,numProbeY,probeType;
    float lambda,tmpFloat,probeDx,probeDy,maxProbeX,minProbeX,maxProbeY,minProbeY;
    LoadList *LL, *New;
@@ -45,21 +45,6 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    else D->gamma=1;
    if(D->gamma>1)   D->boostOn=1;
    else             D->boostOn=0;
-   if(FindParameters("Domain",1,"boostSaveStart",input,str)) boostSaveStart=atoi(str);
-   else  {
-      printf("Boost saveStart must be defined.\n");
-      fail=1;
-   }
-   if(FindParameters("Domain",1,"boostSaveEnd",input,str)) boostSaveEnd=atoi(str);
-   else  {
-      printf("Boost saveEnd must be defined.\n");
-      fail=1;
-   }
-   if(FindParameters("Domain",1,"boostSaveStep",input,str)) boostSaveStep=atoi(str);
-   else  {
-      printf("Boost saveStep must be defined.\n");
-      fail=1;
-   }
    D->beta=sqrt(1-1.0/D->gamma/D->gamma);
 
 
@@ -214,25 +199,24 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    //additional Domain parameters  
    D->dx=1.0/D->divisionLambda;
    D->dt=D->dx;   
-   D->dy=D->dx*dyoverdx/D->gamma/(1+D->beta);
-   if(D->dx*1.1>D->dy) 
-   {
-     while(D->dx*1.1>D->dy)
-     {
-       D->divisionLambda += 1;
-       D->dx=1.0/D->divisionLambda;
-       D->dt=D->dx;   
-     }
-   }
-   printf("gamma=%g, dx=%g, dy=%g, divisionLambda=%g\n",D->gamma,D->dx,D->dy,D->divisionLambda);
+   D->dy=D->dx*dyoverdx;
 /*
+   if(D->gamma>1) 
+   {
+     D->dy=D->dy*D->divisionLambda*0.5/dyoverdx/D->gamma/(1.0+D->beta);
+     D->dx=D->dy*0.5;
+     printf("labframe, dx=%g, dy=%g\n",D->dx,D->dy);
+   }
+*/
+
    tmpFloat=D->dx/(D->gamma*(1+D->beta));
    D->dy=tmpFloat*dyoverdx;
    if(D->dy<=tmpFloat)   {
       printf("dyOverDx is too low. It must be over than %g.\n", D->dx/tmpFloat);
       fail=1;
    }   
-*/
+printf("dx=%g, dy=%g\n",D->dx,D->dy);
+
    D->nx=((int)((maxX-D->minX)/D->lambda/D->dx));
    D->ny=((int)((maxY-D->minY)/D->lambda/D->dy));
    D->omega=2*pi*velocityC/D->lambda;
@@ -334,7 +318,9 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    //additional Boost parameters
    factor=D->gamma*(1+D->beta);
    D->minT=(int)(D->maxStep/factor/factor); 	//boost frame iteration
-   D->maxT=(int)((D->maxStep+D->beta*D->nx)/(1+D->beta)-factor*D->gamma*D->minT*D->beta);	//boost frame iteration
+   D->maxT=(int)(D->gamma*(D->maxStep/factor+D->beta*D->nx/factor-factor*D->beta*D->minT));	//boost frame iteration
+printf("maxT=%d\n",D->maxT);
+
 
    //additional external field parameters
    normalB=eMass*D->omega/(-eCharge);

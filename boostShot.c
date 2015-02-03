@@ -14,7 +14,7 @@ void boostShot(Domain *D,int iteration)
     FILE *out;
     float x,y,e1,e2,e3,b1,b2,b3;
     float xx,yy,E1,E2,E3,B1,B2,B3;
-    float tmp,factor,factor1;
+    float tmp,factor,factor1,weight;
     int myrank, nprocs, cnt;    
     float rho,density,J1;	//save density
     Particle **particle;
@@ -44,25 +44,32 @@ void boostShot(Domain *D,int iteration)
       for(time=D->saveStart; time<=D->maxStep; time+=D->saveStep)
       {
         i=(int)(time/D->gamma/D->beta/factor-iteration/D->beta-D->minXSub+istart);
+        tmp=time/D->gamma/D->beta/factor-iteration/D->beta;
+        weight=tmp-(int)tmp;
         if(i>=istart && i<iend)
         {
           sprintf(name,"bField%d_%d_%d",time,i-istart,myrank);
           remove(name);  
           out = fopen(name,"w");
+          x=tmp*D->dx*D->lambda;
+//          x=(i-istart+D->minXSub)*D->dx*D->lambda;
+          xx=D->gamma*(x+D->beta*iteration*D->dt*D->lambda);
           for(j=jstart; j<jend; j++) 
           {       
             //boost frame data
-            x=(i-istart+D->minXSub)*D->dx*D->lambda;
             y=(j-jstart+D->minYSub)*D->dy*D->lambda;
-            e1=field[i][j].E1;
-            e2=field[i][j].Pr+field[i][j].Pl;
-            e3=field[i][j].Sr+field[i][j].Sl;
-            b1=field[i][j].B1;
-            b2=field[i][j].Sl-field[i][j].Sr;
-            b3=field[i][j].Pr-field[i][j].Pl;
+            e1=(1-weight)*field[i][j].E1+weight*field[i+1][j].E1;
+            e2=(1-weight)*field[i][j].Pr+field[i][j].Pl
+              +(weight)*(field[i+1][j].Pr+field[i+1][j].Pl);
+            e3=(1-weight)*(field[i][j].Sr+field[i][j].Sl)
+              +(weight)*(field[i+1][j].Sr+field[i+1][j].Sl);
+            b1=(1-weight)*field[i][j].B1+weight*field[i+1][j].B1;
+            b2=(1-weight)*(field[i][j].Sl-field[i][j].Sr)
+              +(weight)*(field[i+1][j].Sl-field[i+1][j].Sr);
+            b3=(1-weight)*(field[i][j].Pr-field[i][j].Pl)
+              +(weight)*(field[i+1][j].Pr-field[i+1][j].Pl);
 
             //lab frame data
-            xx=D->gamma*(x+D->beta*iteration*D->dt*D->lambda);
             yy=y;
             E1=e1/factor;
             E2=(e2+D->beta*b3)/factor1;

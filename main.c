@@ -90,17 +90,6 @@ int main(int argc, char *argv[])
     //create mesh
     boundary(&D,&Ext);
 
-    //load boost frame's laser
-    if(D.boostOn==1) {
-      L=D.laserList;
-      while(L->next)  {
-        boostLoadLaser2D(&D,L,t);  
-        L=L->next;
-      }
-      MPI_TransferF_DSX_Yminus(&D,D.numShareDn);
-      MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
-    }
-
     //load plasma or load dump file
     if(argc >= 3 && D.dumpInter==0)
     {   
@@ -142,12 +131,8 @@ int main(int argc, char *argv[])
        if(D.boostOn==1)
        {
           boostShot(&D,iteration);    
-
-//          if(iteration>=D.maxT)   
-//          {
-//             iteration=D.maxStep+1;
-//          }
-
+          if(iteration>=D.maxT)   
+             iteration=D.maxStep+1;
        }
 
        //save File      
@@ -191,6 +176,15 @@ int main(int argc, char *argv[])
            else if(L->direction==-1)     loadLaserOpp2D(&D,L,t); 
            L=L->next;
          }
+       }
+       else if(D.boostOn==1)	{
+         L=D.laserList;
+         while(L->next)  {
+           boostLoadLaser2D(&D,L,t); 
+           L=L->next;
+         }
+         MPI_TransferF_DSX_Yminus(&D,D.numShareDn);
+         MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
        }
 
 

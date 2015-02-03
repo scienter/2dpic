@@ -41,7 +41,6 @@ main(int argc, char *argv[])
      B2[i]=(float *)malloc(ny*sizeof(float ));
      B3[i]=(float *)malloc(ny*sizeof(float ));
    }
-
    for(time=initial; time <= final; time+=timeStep) 
    {
      for(i=0; i<nx; i++)
@@ -84,6 +83,7 @@ main(int argc, char *argv[])
        }	//End of cores
      }		//End of i
 
+printf("time=%d\n",time);
      sprintf(name,"bField%d",time);
      remove(name);
      out=fopen(name,"w");
