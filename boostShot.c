@@ -9,12 +9,12 @@
 
 void boostShot(Domain *D,int iteration)
 {
-    int i,j,s,labStep,istart,iend,jstart,jend,time;
+    int i,j,s,labStep,istart,iend,jstart,jend,time,shiftIndex;
     char name[100];
     FILE *out;
     float x,y,e1,e2,e3,b1,b2,b3;
     float xx,yy,E1,E2,E3,B1,B2,B3;
-    float tmp,factor,factor1,weight;
+    float tmp,factor,factor1,weight,current;
     int myrank, nprocs, cnt;    
     float rho,density,J1;	//save density
     Particle **particle;
@@ -86,41 +86,6 @@ void boostShot(Domain *D,int iteration)
       }		//End of for(time)
     }			//End of fieldType=1
 
-    //save particles
-    for(time=D->saveStart; time<=D->maxStep; time+=D->saveStep)
-    {
-      i=(int)(time/D->gamma/D->beta/factor-iteration/D->beta-D->minXSub+istart);
-      sprintf(name,"bParticle%d_%d",time,myrank);        
-
-      if(i>=istart && i<iend)
-      {
-        out = fopen(name,"a");
-        for(j=jstart; j<jend; j++) 
-        {       
-          p=particle[i][j].head[0]->pt;
-          while(p)
-          {
-            x=(i-istart+D->minXSub+p->x)*D->dx*D->lambda;
-            y=(j-jstart+D->minYSub+p->y)*D->dy*D->lambda;
-            p1=p->p1;
-            p2=p->p2;
-            p3=p->p3;
-            gamma=sqrt(1.0+p1*p1+p2*p2+p3*p3);
-            index=p->index;
- 
-            xx=D->gamma*(x+D->beta*iteration*D->dt*D->lambda);
-            yy=y;
-            pp1=D->gamma*(p1+D->beta*gamma);
-            gamma=sqrt(1.0+pp1*pp1+p2*p2+p3*p3);
-  
-            fprintf(out,"%g %g %g %g %g %g %g\n",xx,yy,pp1,p2,p3,gamma,index);
-            p=p->next;
-          }
-        }	//End of for(j)
-        fclose(out);
-      }		//End of if(i)
-    }			//End of for(time)      
-
     //save density
     float rho0[D->nSpecies];
     s=0;
@@ -135,31 +100,44 @@ void boostShot(Domain *D,int iteration)
     for(time=D->saveStart; time<=D->maxStep; time+=D->saveStep)
     {
       i=(int)(time/D->gamma/D->beta/factor-iteration/D->beta-D->minXSub+istart);
-
+      tmp=time/D->gamma/D->beta/factor-iteration/D->beta;
+      weight=tmp-(int)tmp;
       if(i>=istart && i<iend)
       {
-        sprintf(name,"bDensity%d_%d_%d",time,i,myrank);
+        shiftIndex=(int)(weight+0.5)-1;
+        sprintf(name,"bDensity%d_%d_%d",time,i-istart,myrank);
         remove(name);
         out = fopen(name,"w");
+        x=tmp*D->dx*D->lambda;
+        xx=D->gamma*(x+D->beta*iteration*D->dt*D->lambda);
         for(j=jstart; j<jend; j++) 
         {
           density=0;
           for(s=0; s<1; s++) 
           {       
-            p=particle[i][j].head[s]->pt;
             cnt=0;
+            p=particle[i+shiftIndex][j].head[s]->pt;
             while(p)
             {
-              cnt++;
+              if(p->x>0.5+weight-(int)(weight+0.5))
+                cnt++;
+              p=p->next;
+            }
+            p=particle[i+shiftIndex+1][j].head[s]->pt;
+            while(p)
+            {
+              if(p->x<0.5+weight-(int)(weight+0.5))
+                cnt++;
               p=p->next;
             }
             density+=cnt*rho0[s];
           }
-          x=(i-istart+D->minXSub)*D->dx*D->lambda;
+
           y=(j-jstart+D->minYSub)*D->dy*D->lambda;
-          xx=D->gamma*(x+D->beta*iteration*D->dt*D->lambda);
           yy=y;
-          rho=D->gamma*(density+D->beta*D->fieldDSX[i][j].J1*LL->criticalDensity);
+          weight=weight+0.5-(int)(weight+0.5);
+          current=(1-weight)*D->fieldDSX[i+shiftIndex-1][j].J1+weight*D->fieldDSX[i+shiftIndex][j].J1;
+          rho=D->gamma*(density+D->beta*current*LL->criticalDensity);
   
           fprintf(out,"%g %g %g\n",xx,yy,rho);
         }	//End of for(j)
