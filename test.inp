@@ -5,30 +5,30 @@
  probeY0=20e-6
 
 [Domain]
- CurrentType=1
- InterpolationType=1
+ CurrentType=3
+ InterpolationType=2
  FieldType=1
 
- maxStep=4000
- saveStep=200
+ maxStep=10000
+ saveStep=1000
  saveStart=0
  dumpSave=1
- dumpStart=200
+ dumpStart=10000
 
 
- moving=0
+ moving=1
 
  minX=0
- maxX=80e-6
- minY=-80e-6
- maxY=80e-6
+ maxX=40e-6
+ minY=0e-6
+ maxY=50e-6
  lambda=1e-6
  divisionLambda=20	// dx is [wavelength/divisionLambda]
  dy_over_dx = 10
 
- boostGamma=1
- filter=0
- filterStep=4
+ boostGamma=2
+ filter=1
+ filterStep=2
  boostSaveStart=50000
  boostSaveEnd=50000
  boostSaveStep=50000
@@ -39,15 +39,15 @@
 
 [Laser]
  wavelength=1e-6
- a0=1
- rU=3			//number of wave lenth
- rD=3
+ a0=3
+ rU=4			//number of wave lenth
+ rD=4
  flat=0
  polarity=2
  loadPositionX=0e-5		//laser start position [m]
  loadPositionY=1e-5		//laser start position [m]
- beamWaist=8e-6
- focus=20e-6
+ beamWaist=9e-6
+ focus=170e-6
 
 
 [External]
@@ -65,25 +65,56 @@
  numberInCell=2
  startIndex=0		//The starting particle index
  velocityX=0.0
- with_next_species=0
+ with_next_species=1
  with_prev_species=0
  temperature=0
 
  Lnodes=4
- X0=5e-6
- X1=6e-6
- X2=30e-6
- X3=31e-6
+ X0=70e-6
+ X1=170e-6
+ X2=3000e-6
+ X3=3100e-6
  Ln0=0
  Ln1=1
  Ln2=1
- Ln3=0
+ Ln3=1
 
  Tnodes=4
- Y0=-20e-6
- Y1=-19e-6
- Y2=19e-6
- Y3=20e-6
+ Y0=5e-6
+ Y1=6e-6
+ Y2=44e-6
+ Y3=45e-6
+ Tn0=0
+ Tn1=1
+ Tn2=1
+ Tn3=0
+
+[Plasma]
+ species=HPlus1
+ type=4Point
+ density=1e25
+ numberInCell=2
+ startIndex=0		//The starting particle index
+ velocityX=0.0
+ with_next_species=0
+ with_prev_species=1
+ temperature=0
+
+ Lnodes=4
+ X0=70e-6
+ X1=170e-6
+ X2=3000e-6
+ X3=3100e-6
+ Ln0=0
+ Ln1=1
+ Ln2=1
+ Ln3=1
+
+ Tnodes=4
+ Y0=5e-6
+ Y1=6e-6
+ Y2=44e-6
+ Y3=45e-6
  Tn0=0
  Tn1=1
  Tn2=1
