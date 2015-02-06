@@ -72,7 +72,8 @@ int main(int argc, char *argv[])
     void MPI_TransferJ_DSX_Yplus();
     void rearrangeParticles();
 
-     begin=clock();
+    if(myrank==0)
+      begin=clock();
 
     if(argc < 2) 
     {  
@@ -110,6 +111,16 @@ int main(int argc, char *argv[])
       loadPlasma2D(&D);
       t=0;
     }
+
+    if(D.boostOn==1)	{
+      L=D.laserList;
+      while(L->next)  {
+        boostLoadLaser2D(&D,L); 
+        L=L->next;
+      }
+      MPI_TransferF_DSX_Yminus(&D,D.numShareDn);
+      MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
+   }
 
     //rooping time 
    labSaveStep=D.boostSaveStep;
@@ -177,15 +188,15 @@ int main(int argc, char *argv[])
            L=L->next;
          }
        }
-       else if(D.boostOn==1)	{
-         L=D.laserList;
-         while(L->next)  {
-           boostLoadLaser2D(&D,L,t); 
-           L=L->next;
-         }
-         MPI_TransferF_DSX_Yminus(&D,D.numShareDn);
-         MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
-       }
+//       else if(D.boostOn==1)	{
+//         L=D.laserList;
+//         while(L->next)  {
+//           boostLoadLaser2D(&D,L,t); 
+//           L=L->next;
+//         }
+//         MPI_TransferF_DSX_Yminus(&D,D.numShareDn);
+//         MPI_TransferF_DSX_Yplus(&D,D.numShareUp);
+//       }
 
 
 //       if(nTasks==1)  periodY1core(&D);   
@@ -261,17 +272,21 @@ int main(int argc, char *argv[])
 
     }     //end of time roop                  
 
-    end=clock();
-    time_spent=(end-begin)/CLOCKS_PER_SEC;
+    if(myrank==0)
+    {
+      end=clock();
+      time_spent=(end-begin)/CLOCKS_PER_SEC;
 
-    //make 'report' file
-    sprintf(name,"report");
-    out = fopen(name,"w");
-    fprintf(out,"nx=%d\n",D.nx);
-    fprintf(out,"ny=%d\n",D.ny);
-    fprintf(out,"cores=%d\n",nTasks);
-    fprintf(out,"running time=%gm\n",time_spent/60.0);
-    fclose(out);
+      //make 'report' file
+      sprintf(name,"report");
+      out = fopen(name,"w");
+      fprintf(out,"nx=%d\n",D.nx);
+      fprintf(out,"ny=%d\n",D.ny);
+      fprintf(out,"cores=%d\n",nTasks);
+      fprintf(out,"running time=%gm\n",time_spent/60.0);
+      fclose(out);
+    }
+
 
     clean2D(&D);
   

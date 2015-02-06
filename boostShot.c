@@ -13,7 +13,7 @@ void boostShot(Domain *D,int iteration)
     char name[100];
     FILE *out;
     float x,y,e1,e2,e3,b1,b2,b3;
-    float xx,yy,E1,E2,E3,B1,B2,B3;
+    float xx,yy,E1,E2,E3,B1,B2,B3,energy,px;
     float tmp,factor,factor1,weight,current;
     int myrank, nprocs, cnt;    
     float rho,density,J1;	//save density
@@ -112,7 +112,9 @@ void boostShot(Domain *D,int iteration)
                 xx=D->gamma*(x+D->beta*iteration*D->dt*D->lambda);
                 yy=(j-jstart+D->minYSub)*D->dy*D->lambda;
                 gamma=sqrt(1.0+p->p1*p->p1+p->p2*p->p2+p->p3*p->p3);
-                fprintf(out,"%g %g %g\n",xx,yy,gamma);
+                px=D->gamma*(p->p1+gamma*D->beta);
+                energy=D->gamma*(gamma+D->beta*p->p1);
+                fprintf(out,"%g %g %g %g %g %g %g\n",xx,yy,px,p->p2,p->p3,energy,p->index);
               }
               p=p->next;
             }
@@ -127,7 +129,9 @@ void boostShot(Domain *D,int iteration)
                 xx=D->gamma*(x+D->beta*iteration*D->dt*D->lambda);
                 yy=(j-jstart+D->minYSub)*D->dy*D->lambda;
                 gamma=sqrt(1.0+p->p1*p->p1+p->p2*p->p2+p->p3*p->p3);
-                fprintf(out,"%g %g %g\n",xx,yy,gamma);
+                px=D->gamma*(p->p1+gamma*D->beta);
+                energy=D->gamma*(gamma+D->beta*p->p1);
+                fprintf(out,"%g %g %g %g %g %g %g\n",xx,yy,px,p->p2,p->p3,energy,p->index);
               }
               p=p->next;
             }

@@ -211,11 +211,11 @@ void parameterSetting(Domain *D,External *Ext, char *input)
 
    tmpFloat=D->dx/(D->gamma*(1+D->beta));
    D->dy=tmpFloat*dyoverdx;
-   if(D->dy<=tmpFloat)   {
-      printf("dyOverDx is too low. It must be over than %g.\n", D->dx/tmpFloat);
+   printf("dx=%g, dy=%g\n",D->dx,D->dy);
+   if(D->dy<=D->dx*1.5)   {
+      printf("dyOverDx is too low. It must be over than %g.\n", D->gamma*(1+D->beta)*1.5);
       fail=1;
    }   
-printf("dx=%g, dy=%g\n",D->dx,D->dy);
 
    D->nx=((int)((maxX-D->minX)/D->lambda/D->dx));
    D->ny=((int)((maxY-D->minY)/D->lambda/D->dy));
@@ -432,7 +432,7 @@ int findLaserParameters(int rank, LaserList *L,Domain *D,char *input)
      L->omega=2*pi*velocityC/L->lambda;
      L->loadPointX=((int)(positionX/D->lambda/D->dx));   
      L->loadPointY=((int)(positionY/D->lambda/D->dy));   
-     L->rayleighLength=pi/L->lambda/D->gamma/(1+D->beta)*L->beamWaist*L->beamWaist/D->lambda;
+     L->rayleighLength=pi/L->lambda*D->gamma*(1+D->beta)*L->beamWaist*L->beamWaist/D->lambda;
      L->beamWaist=L->beamWaist/D->lambda;
      L->focus=L->focus/D->lambda;
      if(fail==1)
