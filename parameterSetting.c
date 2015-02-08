@@ -46,6 +46,12 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    if(D->gamma>1)   D->boostOn=1;
    else             D->boostOn=0;
    D->beta=sqrt(1-1.0/D->gamma/D->gamma);
+   if(FindParameters("Domain",1,"passNum",input,str)) D->passNum=atoi(str);
+   else D->passNum=1;
+   if(FindParameters("Domain",1,"stride",input,str)) D->stride=atoi(str);
+   else D->stride=1;
+   if(FindParameters("Domain",1,"boostSave",input,str)) D->boostSave=atoi(str);
+   else D->boostSave=0;
 
 
 
@@ -432,7 +438,8 @@ int findLaserParameters(int rank, LaserList *L,Domain *D,char *input)
      L->omega=2*pi*velocityC/L->lambda;
      L->loadPointX=((int)(positionX/D->lambda/D->dx));   
      L->loadPointY=((int)(positionY/D->lambda/D->dy));   
-     L->rayleighLength=pi/L->lambda*D->gamma*(1+D->beta)*L->beamWaist*L->beamWaist/D->lambda;
+     L->rayleighLength=pi/L->lambda*L->beamWaist*L->beamWaist/D->lambda;
+//     L->rayleighLength=pi/L->lambda*D->gamma*(1+D->beta)*L->beamWaist*L->beamWaist/D->lambda;
      L->beamWaist=L->beamWaist/D->lambda;
      L->focus=L->focus/D->lambda;
      if(fail==1)

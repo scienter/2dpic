@@ -40,7 +40,7 @@ void movingDomain2D(Domain *D)
       field=D->fieldDSX;
 
       for(i=istart-1; i<iend; i++)
-        for(j=jstart-1; j<jend; j++)
+        for(j=jstart-2; j<jend+3; j++)
         {
           field[i][j].E1=field[i+1][j].E1;
           field[i][j].B1=field[i+1][j].B1;

@@ -672,6 +672,7 @@ void MPI_TransferF_DSX_Yplus(Domain *D, int numShare)
         start+=nx+5;
         for(i=ibegin; i<ibottom; i++)
            D->upF[start+i]=field[i][jend-col].B1;
+        start+=nx+5;
       }
        MPI_Send(D->upF,numberData, MPI_FLOAT, myrank+1, myrank, MPI_COMM_WORLD);             
     }

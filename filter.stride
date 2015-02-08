@@ -1,0 +1,222 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "mesh.h"
+#include "mpi.h"
+
+void filterField(Domain *D,int passNum,int stride)
+{
+    int i,j,istart,iend,jstart,jend,pass,a;  
+    float alpha[2];
+    float nowE1,nowB1,nowPr,nowPl,nowSr,nowSl;
+    float nowE1C,nowB1C,nowPrC,nowPlC,nowSrC,nowSlC;
+    float beforeE1,beforeB1,beforePr,beforePl,beforeSr,beforeSl;
+    float beforeE1C,beforeB1C,beforePrC,beforePlC,beforeSrC,beforeSlC;
+    float *filter;
+    int myrank,nTasks;  
+ 
+    istart=D->istart;
+    iend=D->iend;
+    jstart=D->jstart;
+    jend=D->jend;
+
+    alpha[0]=0.5;
+    alpha[1]=passNum*0.5+1;
+//    alpha[1]=-1.[0]/6.[0];
+
+    filter = (float *)malloc((D->nx+5)*sizeof(float ));
+    for(i=0; i<D->nx+5; i++)
+      filter[i]=0.0;
+
+    if(D->fieldType==1)
+    {    
+      FieldDSX **field;
+      field=D->fieldDSX;
+
+      //Filtering
+      a=0;
+      for(j=0; j<jend+3; j++)
+      {
+        for(i=stride; i<=iend-stride; i++)
+         filter[i]=alpha[a]*field[i][j].E1+(1.0-alpha[a])*(field[i-stride][j].E1+field[i+stride][j].E1)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].E1=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].B1+(1.0-alpha[a])*(field[i-stride][j].B1+field[i+stride][j].B1)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].B1=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].Pr+(1.0-alpha[a])*(field[i-stride][j].Pr+field[i+stride][j].Pr)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].Pr=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].Pl+(1.0-alpha[a])*(field[i-stride][j].Pl+field[i+stride][j].Pl)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].Pl=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].Sr+(1.0-alpha[a])*(field[i-stride][j].Sr+field[i+stride][j].Sr)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].Sr=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].Sl+(1.0-alpha[a])*(field[i-stride][j].Sl+field[i+stride][j].Sl)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].Sl=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].E1C+(1.0-alpha[a])*(field[i-stride][j].E1C+field[i+stride][j].E1C)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].E1C=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].B1C+(1.0-alpha[a])*(field[i-stride][j].B1C+field[i+stride][j].B1C)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].B1C=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].PrC+(1.0-alpha[a])*(field[i-stride][j].PrC+field[i+stride][j].PrC)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].PrC=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].PlC+(1.0-alpha[a])*(field[i-stride][j].PlC+field[i+stride][j].PlC)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].PlC=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].SrC+(1.0-alpha[a])*(field[i-stride][j].SrC+field[i+stride][j].SrC)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].SrC=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].SlC+(1.0-alpha[a])*(field[i-stride][j].SlC+field[i+stride][j].SlC)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].SlC=filter[i];
+          filter[i]=0.0;
+        }
+              
+      }           //end of for(j)
+
+      //Compensation
+      a=1;
+      for(j=0; j<jend+3; j++)
+      {
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].E1+(1.0-alpha[a])*(field[i-stride][j].E1+field[i+stride][j].E1)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].E1=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].B1+(1.0-alpha[a])*(field[i-stride][j].B1+field[i+stride][j].B1)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].B1=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].Pr+(1.0-alpha[a])*(field[i-stride][j].Pr+field[i+stride][j].Pr)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].Pr=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].Pl+(1.0-alpha[a])*(field[i-stride][j].Pl+field[i+stride][j].Pl)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].Pl=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].Sr+(1.0-alpha[a])*(field[i-stride][j].Sr+field[i+stride][j].Sr)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].Sr=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].Sl+(1.0-alpha[a])*(field[i-stride][j].Sl+field[i+stride][j].Sl)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].Sl=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].E1C+(1.0-alpha[a])*(field[i-stride][j].E1C+field[i+stride][j].E1C)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].E1C=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].B1C+(1.0-alpha[a])*(field[i-stride][j].B1C+field[i+stride][j].B1C)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].B1C=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].PrC+(1.0-alpha[a])*(field[i-stride][j].PrC+field[i+stride][j].PrC)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].PrC=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].PlC+(1.0-alpha[a])*(field[i-stride][j].PlC+field[i+stride][j].PlC)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].PlC=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].SrC+(1.0-alpha[a])*(field[i-stride][j].SrC+field[i+stride][j].SrC)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].SrC=filter[i];
+          filter[i]=0.0;
+        }
+        for(i=stride; i<=iend-stride; i++)
+          filter[i]=alpha[a]*field[i][j].SlC+(1.0-alpha[a])*(field[i-stride][j].SlC+field[i+stride][j].SlC)*0.5;
+        for(i=stride; i<=iend-stride; i++)
+        {
+          field[i][j].SlC=filter[i];
+          filter[i]=0.0;
+        }
+      }           //end of for(j)
+
+    } 			//end of fieldType==1
+    
+    free(filter);    
+
+}
+
+
