@@ -43,6 +43,8 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    //Boost frame
    if(FindParameters("Domain",1,"boostGamma",input,str)) D->gamma=atof(str);
    else D->gamma=1;
+   if(FindParameters("Domain",1,"boostSave",input,str)) D->boostSave=atoi(str);
+   else D->boostSave=0;
    if(D->gamma>1)   D->boostOn=1;
    else             D->boostOn=0;
    D->beta=sqrt(1-1.0/D->gamma/D->gamma);

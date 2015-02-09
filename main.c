@@ -72,8 +72,8 @@ int main(int argc, char *argv[])
     void MPI_TransferJ_DSX_Yplus();
     void rearrangeParticles();
 
-    if(myrank==0)
-      begin=clock();
+//    begin=MPI_Wtime();
+    begin=clock();
 
     if(argc < 2) 
     {  
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
           filterField(&D);       
        }
        
-       if(D.boostOn==1)
+       if(D.boostOn==1 && D.boostSave==1)
        {
           boostShot(&D,iteration);    
           if(iteration>=D.maxT)   
@@ -272,9 +272,10 @@ int main(int argc, char *argv[])
 
     }     //end of time roop                  
 
+    end=clock();
+
     if(myrank==0)
     {
-      end=clock();
       time_spent=(end-begin)/CLOCKS_PER_SEC;
 
       //make 'report' file

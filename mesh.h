@@ -73,6 +73,7 @@ typedef struct _Domain
 
    //Boost
    int boostOn;
+   int boostSave;
    float gamma;
    float beta;
    int minT;	//boost frame's step
