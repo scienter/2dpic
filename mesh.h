@@ -78,9 +78,6 @@ typedef struct _Domain
    int minT;	//boost frame's step
    int maxT;	//boost frame's step
    int boostSaveStep;	//lab frame's step
-   int passNum;
-   int boostSave;
-   int stride;
    
    //Probe
    int probeNum;

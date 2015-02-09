@@ -136,13 +136,10 @@ int main(int argc, char *argv[])
        {
 //          MPI_TransferF_Xminus(&D);
 //          MPI_TransferF_XplusFilter(&D);
-          D.stride=1;
-          filterField(&D,D.passNum);       
-//          filterField(&D,D.passNum,D.stride+1);       
-//          filterField(&D,D.passNum,D.stride+2);       
+          filterField(&D);       
        }
        
-       if(D.boostOn==1 && D.boostSave==1)
+       if(D.boostOn==1)
        {
           boostShot(&D,iteration);    
           if(iteration>=D.maxT)   

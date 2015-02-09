@@ -39,13 +39,8 @@ void movingDomain2D(Domain *D)
       FieldDSX **field;
       field=D->fieldDSX;
 
-<<<<<<< HEAD
       for(i=istart-1; i<=iend; i++)
         for(j=0; j<jend+3; j++)
-=======
-      for(i=istart-1; i<iend; i++)
-        for(j=jstart-2; j<jend+3; j++)
->>>>>>> 72dfe2d831a341aebc18d98820798c190c330152
         {
           field[i][j].E1=field[i+1][j].E1;
           field[i][j].B1=field[i+1][j].B1;
