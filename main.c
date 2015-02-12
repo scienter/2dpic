@@ -132,15 +132,12 @@ int main(int argc, char *argv[])
        //probe data
        probe(&D,iteration);
        
-       if(filter==1 && iteration%filterStep==0)
-       {
-//          MPI_TransferF_Xminus(&D);
-//          MPI_TransferF_XplusFilter(&D);
-          filterField(&D);       
-       }
        
        if(D.boostOn==1 && D.boostSave==1)
        {
+          if(filter==1 && iteration%filterStep==0)
+            filterField(&D);       
+
           boostShot(&D,iteration);    
           if(iteration>=D.maxT)   
              iteration=D.maxStep+1;
